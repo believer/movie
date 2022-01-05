@@ -1,0 +1,93 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model genre {
+  id          Int           @id @default(autoincrement())
+  name        String        @unique
+  movie_genre movie_genre[]
+}
+
+model movie {
+  id           Int            @id @default(autoincrement())
+  created_at   DateTime       @default(now()) @db.Timestamp(6)
+  updated_at   DateTime       @default(now()) @db.Timestamp(6)
+  title        String
+  runtime      Int            @default(0)
+  release_date DateTime?      @db.Date
+  imdb_id      String         @unique
+  imdb_rating  String?
+  overview     String?
+  tagline      String?
+  poster       String?
+  movie_genre  movie_genre[]
+  movie_person movie_person[]
+  rating       rating[]
+  seen         seen[]
+
+  @@index([created_at], map: "movie_created_at_index")
+}
+
+model movie_genre {
+  id       Int   @id @default(autoincrement())
+  movie_id Int
+  genre_id Int
+  genre    genre @relation(fields: [genre_id], references: [id], onUpdate: Restrict)
+  movie    movie @relation(fields: [movie_id], references: [id], onUpdate: Restrict)
+
+  @@index([genre_id])
+  @@index([movie_id])
+}
+
+model movie_person {
+  id        Int    @id @default(autoincrement())
+  movie_id  Int
+  person_id Int
+  job       job
+  movie     movie  @relation(fields: [movie_id], references: [id], onUpdate: Restrict)
+  person    person @relation(fields: [person_id], references: [id], onUpdate: Restrict)
+
+  @@unique([movie_id, person_id, job])
+  @@index([movie_id])
+}
+
+model person {
+  id           Int            @id @default(autoincrement())
+  name         String
+  original_id  Int            @unique
+  movie_person movie_person[]
+}
+
+model rating {
+  id         Int      @id @default(autoincrement())
+  movie_id   Int
+  rating     Int
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  updated_at DateTime @default(now()) @db.Timestamp(6)
+  movie      movie    @relation(fields: [movie_id], references: [id], onUpdate: Restrict)
+
+  @@index([movie_id])
+}
+
+model seen {
+  id       Int      @id @default(autoincrement())
+  movie_id Int
+  date     DateTime @default(now()) @db.Timestamp(6)
+  movie    movie    @relation(fields: [movie_id], references: [id], onUpdate: Restrict)
+
+  @@index([date], map: "seen_created_at_index")
+  @@index([movie_id])
+}
+
+enum job {
+  cast
+  composer
+  director
+  producer
+  writer
+}

@@ -1,0 +1,126 @@
+import { job } from '@prisma/client'
+import { ActionFunction, redirect } from 'remix'
+import { db } from '~/utils/db.server'
+
+export const action: ActionFunction = async ({ request }) => {
+  const tmdbBaseUrl = 'https://api.themoviedb.org/3/movie'
+  const form = await request.formData()
+
+  const imdbId = form.get('imdb')
+  const rating = Number(form.get('rating'))
+  const date = form.get('date')
+    ? new Date(form.get('date') as string).toISOString()
+    : new Date().toISOString()
+
+  const movieResponse = await fetch(
+    `${tmdbBaseUrl}/${imdbId}?api_key=${process.env.TMDB_API_KEY}`
+  )
+  const movie = await movieResponse.json()
+
+  const creditsResponse = await fetch(
+    `${tmdbBaseUrl}/${imdbId}/credits?api_key=${process.env.TMDB_API_KEY}`
+  )
+  const credits = await creditsResponse.json()
+
+  let persons = []
+
+  for (const cast of credits.cast) {
+    persons.push({
+      job: 'cast' as job,
+      person: {
+        connectOrCreate: {
+          create: { name: cast.name, original_id: cast.id },
+          where: { original_id: cast.id },
+        },
+      },
+    })
+  }
+
+  const validDepartments = ['Writing', 'Sound', 'Production', 'Directing']
+
+  const jobs: Record<string, job> = {
+    Screenplay: 'writer',
+    Writer: 'writer',
+    'Original Music Composer': 'composer',
+    Producer: 'producer',
+    'Associate Producer': 'producer',
+    'Executive Producer': 'producer',
+    Director: 'director',
+  }
+
+  for (const credit of credits.crew) {
+    if (
+      Object.keys(jobs).includes(credit.job) &&
+      validDepartments.includes(credit.department)
+    ) {
+      persons.push({
+        job: jobs[credit.job as keyof typeof jobs],
+        person: {
+          connectOrCreate: {
+            create: { name: credit.name, original_id: credit.id },
+            where: { original_id: credit.id },
+          },
+        },
+      })
+    }
+  }
+
+  const fields = {
+    data: {
+      imdb_id: movie.imdb_id,
+      overview: movie.overview,
+      runtime: movie.runtime,
+      poster: movie.poster_path,
+      release_date: new Date(movie.release_date),
+      tagline: movie.tagline,
+      title: movie.title,
+      rating: {
+        create: [{ rating }],
+      },
+      seen: {
+        create: [{ date }],
+      },
+      movie_genre: {
+        create: movie.genres.map(({ name }: { name: string }) => ({
+          genre: { connectOrCreate: { create: { name }, where: { name } } },
+        })),
+      },
+      movie_person: {
+        create: persons,
+      },
+    },
+  }
+
+  const newMovie = await db.movie.create(fields)
+
+  return redirect(`/movie/${newMovie.id}`)
+}
+
+export default function AddMoviePage() {
+  return (
+    <div className="max-w-4xl mx-auto">
+      <form method="post">
+        <div>
+          <label>
+            IMDb Id: <input type="text" name="imdb" />
+          </label>
+        </div>
+        <div>
+          <label>
+            Rating: <input min="0" max="10" type="number" name="rating" />
+          </label>
+        </div>
+        <div>
+          <label>
+            Date: <input type="datetime-local" name="date" />
+          </label>
+        </div>
+        <div>
+          <button type="submit" className="button">
+            Add movie
+          </button>
+        </div>
+      </form>
+    </div>
+  )
+}
