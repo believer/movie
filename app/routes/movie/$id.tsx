@@ -1,5 +1,6 @@
 import { genre, job, movie, person, seen } from '@prisma/client'
 import { Link, LoaderFunction, useLoaderData } from 'remix'
+import Poster from '~/components/poster'
 import { db } from '~/utils/db.server'
 
 const dateFormatter = new Intl.DateTimeFormat('sv-SE')
@@ -48,6 +49,9 @@ export default function MoviePage() {
       </div>
       <div className="grid grid-cols-1 lg:grid-movie gap-5 mt-8">
         <div className="lg:col-start-3 lg:col-end-4">
+          <div className="w-60 mb-5">
+            <Poster image={movie.poster} />
+          </div>
           <h1 className="text-4xl font-bold">{movie.title}</h1>
           <div className="mt-2 mb-4 flex text-sm text-gray-600">
             {movie.movie_genre.map(({ genre }) => genre.name).join(', ')}
