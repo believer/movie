@@ -40,10 +40,14 @@ export default function MoviePage() {
   const crew = movie.movie_person.filter(({ job }) => job !== 'cast')
 
   return (
-    <div>
-      <Link to="/">Back</Link>
-      <div className="grid md:grid-movie gap-5 mt-8">
-        <div className="col-start-3 col-end-3">
+    <div className="my-10 mx-5 lg:mx-0">
+      <div className="grid lg:grid-movie gap-5">
+        <div className="lg:col-start-3 lg:col-end-4">
+          <Link to="/">Back</Link>
+        </div>
+      </div>
+      <div className="grid grid-cols-1 lg:grid-movie gap-5 mt-8">
+        <div className="lg:col-start-3 lg:col-end-4">
           <h1 className="text-4xl font-bold">{movie.title}</h1>
           <div className="mt-2 mb-4 flex text-sm text-gray-600">
             {movie.movie_genre.map(({ genre }) => genre.name).join(', ')}
@@ -58,9 +62,9 @@ export default function MoviePage() {
               ))}
           </ul>
         </div>
-        <div>
+        <div className="lg:col-start-4 lg:col-end-5">
           <h2 className="text-lg font-semibold mb-4">Cast</h2>
-          <ul className="grid grid-cols-3 gap-y-1">
+          <ul className="grid grid-cols-2 lg:grid-cols-3 gap-y-1">
             {cast.map(({ person }) => (
               <li key={person.id}>
                 <Link
@@ -74,7 +78,7 @@ export default function MoviePage() {
             ))}
           </ul>
           <h2 className="text-lg font-semibold my-4">Crew</h2>
-          <ul className="grid grid-cols-3 gap-y-1">
+          <ul className="grid grid-cols-2 lg:grid-cols-3 gap-y-1">
             {crew.map(({ job, person }) => (
               <li key={person.id} className="flex items-center space-x-2">
                 <Link
