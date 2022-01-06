@@ -40,52 +40,56 @@ export default function MoviePage() {
   const crew = movie.movie_person.filter(({ job }) => job !== 'cast')
 
   return (
-    <div className="mx-auto max-w-4xl my-10">
+    <div>
       <Link to="/">Back</Link>
-      <h1 className="text-4xl font-bold my-8">{movie.title}</h1>
-      <p>{movie.overview}</p>
-      <ul className="mt-4">
-        {movie.seen
-          .map(({ date }) => dateFormatter.format(new Date(date)))
-          .map((date) => {
-            return <li key={date}>{date}</li>
-          })}
-      </ul>
-      <ul className="mt-4">
-        {movie.movie_genre.map(({ genre }) => {
-          return <li key={genre.id}>{genre.name}</li>
-        })}
-      </ul>
-      <ul className="mt-4 grid grid-cols-3 gap-y-1">
-        {cast.map(({ person }) => {
-          return (
-            <li key={person.id}>
-              <Link
-                className="text-blue-700 underline"
-                to={`/person/${person.id}`}
-                prefetch="intent"
-              >
-                {person.name}
-              </Link>
-            </li>
-          )
-        })}
-      </ul>
-      <ul className="mt-4 grid grid-cols-3 gap-y-1">
-        {crew.map(({ job, person }) => {
-          return (
-            <li key={person.id} className="flex items-center space-x-2">
-              <Link
-                className="text-blue-700 underline"
-                to={`/person/${person.id}`}
-              >
-                {person.name}
-              </Link>
-              <span className="text-xs text-gray-500">{job}</span>
-            </li>
-          )
-        })}
-      </ul>
+      <div className="grid md:grid-movie gap-5 mt-8">
+        <div className="col-start-3 col-end-3">
+          <h1 className="text-4xl font-bold">{movie.title}</h1>
+          <div className="mt-2 mb-4 flex text-sm text-gray-600">
+            {movie.movie_genre.map(({ genre }) => genre.name).join(', ')}
+          </div>
+          <p>{movie.overview}</p>
+          <h2 className="text-lg font-semibold mt-4 mb-2">Seen</h2>
+          <ul className="mb-4 text-sm text-gray-600">
+            {movie.seen
+              .map(({ date }) => dateFormatter.format(new Date(date)))
+              .map((date) => (
+                <li key={date}>{date}</li>
+              ))}
+          </ul>
+        </div>
+        <div>
+          <h2 className="text-lg font-semibold mb-4">Cast</h2>
+          <ul className="grid grid-cols-3 gap-y-1">
+            {cast.map(({ person }) => (
+              <li key={person.id}>
+                <Link
+                  className="text-blue-700 underline text-sm"
+                  to={`/person/${person.id}`}
+                  prefetch="intent"
+                >
+                  {person.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <h2 className="text-lg font-semibold my-4">Crew</h2>
+          <ul className="grid grid-cols-3 gap-y-1">
+            {crew.map(({ job, person }) => (
+              <li key={person.id} className="flex items-center space-x-2">
+                <Link
+                  className="text-blue-700 underline text-sm"
+                  to={`/person/${person.id}`}
+                  prefetch="intent"
+                >
+                  {person.name}
+                </Link>
+                <span className="text-xs text-gray-500">{job}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
     </div>
   )
 }

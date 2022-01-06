@@ -8,7 +8,7 @@ export default function Poster({ image }: PosterProps) {
   return (
     <img
       className="rounded-sm"
-      src={`https://image.tmdb.org/t/p/w500/${image}`}
+      src={`https://image.tmdb.org/t/p/w500${image}`}
     />
   )
 }

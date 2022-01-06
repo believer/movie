@@ -1,8 +1,10 @@
 import {
+  ActionFunction,
   Links,
   LiveReload,
   Meta,
   Outlet,
+  redirect,
   Scripts,
   ScrollRestoration,
 } from 'remix'
@@ -15,6 +17,13 @@ export function links() {
 
 export const meta: MetaFunction = () => {
   return { title: 'Movies' }
+}
+
+export const action: ActionFunction = async ({ request }) => {
+  const form = await request.formData()
+  const year = form.get('year')
+
+  return redirect(`?year=${year}`)
 }
 
 export default function App() {
