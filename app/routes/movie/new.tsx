@@ -48,8 +48,6 @@ const getCastAndCrew = (
     }
   }
 
-  console.log(JSON.stringify(Array.from(persons.values()), null, 2))
-
   return Array.from(persons.values())
 }
 
