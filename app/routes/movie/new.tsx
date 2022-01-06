@@ -2,10 +2,9 @@ import { ActionFunction, redirect } from 'remix'
 import { getCastAndCrew, imdbId } from '~/utils/addMovie.server'
 import { db } from '~/utils/db.server'
 
-const tmdbBaseUrl = 'https://api.themoviedb.org/3/movie'
-const tmdbKey = process.env.TMDB_API_KEY
-
 const tmdbFetch = async (route: string) => {
+  const tmdbBaseUrl = 'https://api.themoviedb.org/3/movie'
+  const tmdbKey = process.env.TMDB_API_KEY
   const response = await fetch(`${tmdbBaseUrl}${route}?api_key=${tmdbKey}`)
   const data = await response.json()
 
