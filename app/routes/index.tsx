@@ -1,4 +1,4 @@
-import type { movie, rating } from '@prisma/client'
+import type { movie, rating, seen } from '@prisma/client'
 import React from 'react'
 import type { LoaderFunction } from 'remix'
 import { Link, useLoaderData } from 'remix'
@@ -8,8 +8,11 @@ import { db } from '~/utils/db.server'
 type LoaderData = {
   year: string
   moviesInYear: number
+  newMoviesInYear: number
   movies: Array<
-    Pick<movie, 'id' | 'title' | 'poster'> & { rating: Array<rating> }
+    Pick<seen, 'id'> & {
+      movie: Pick<movie, 'id' | 'title' | 'poster'> & { rating: Array<rating> }
+    }
   >
 }
 
@@ -20,23 +23,33 @@ export let loader: LoaderFunction = async ({ request }) => {
 
   const filterByYear = {
     where: {
-      seen: {
-        every: {
-          date: {
-            gte: new Date(`${year}-01-01`),
-            lte: new Date(`${year}-12-31`),
-          },
-        },
+      date: {
+        gte: new Date(`${year}-01-01`),
+        lte: new Date(`${year}-12-31`),
       },
     },
   }
 
   const data: LoaderData = {
     year,
-    moviesInYear: await db.movie.count(filterByYear),
-    movies: await db.movie.findMany({
-      select: { id: true, title: true, poster: true, rating: true },
-      orderBy: { id: 'desc' },
+    moviesInYear: await db.seen.count(filterByYear),
+    newMoviesInYear: await db.movie.count({
+      where: {
+        seen: {
+          every: {
+            date: filterByYear.where.date,
+          },
+        },
+      },
+    }),
+    movies: await db.seen.findMany({
+      select: {
+        id: true,
+        movie: {
+          select: { id: true, title: true, poster: true, rating: true },
+        },
+      },
+      orderBy: { date: 'desc' },
       ...filterByYear,
     }),
   }
@@ -77,7 +90,7 @@ export default function Index() {
       {data.moviesInYear > 0 ? (
         <>
           <ul className="col-start-3 col-end-3 grid-cols-1 md:grid-cols-2 grid lg:grid-cols-4 gap-5">
-            {data.movies.map((movie) => (
+            {data.movies.map(({ movie }) => (
               <li key={movie.id}>
                 <Link to={`/movie/${movie.id}`} prefetch="intent">
                   <Poster image={movie.poster} />
@@ -92,7 +105,8 @@ export default function Index() {
             ))}
           </ul>
           <div className="col-span-full mt-5 text-gray-600 text-center text-sm">
-            Movies in year: {data.moviesInYear}
+            Movies in year: {data.moviesInYear} | New movies this year:{' '}
+            {data.newMoviesInYear}
           </div>
         </>
       ) : (
