@@ -2,11 +2,63 @@ import { job } from '@prisma/client'
 import { ActionFunction, redirect } from 'remix'
 import { db } from '~/utils/db.server'
 
+const validDepartments = ['Writing', 'Sound', 'Production', 'Directing']
+const jobs: Record<string, job> = {
+  Screenplay: 'writer',
+  Writer: 'writer',
+  'Original Music Composer': 'composer',
+  Producer: 'producer',
+  'Associate Producer': 'producer',
+  'Executive Producer': 'producer',
+  Director: 'director',
+}
+
+const getCastAndCrew = (
+  cast: Array<{ name: string; id: number }>,
+  crew: Array<{ name: string; id: number; job: job; department: string }>
+) => {
+  const persons = new Map()
+
+  for (const credit of cast) {
+    persons.set(credit.id + '-cast', {
+      job: 'cast' as job,
+      person: {
+        connectOrCreate: {
+          create: { name: credit.name, original_id: credit.id },
+          where: { original_id: credit.id },
+        },
+      },
+    })
+  }
+
+  for (const credit of crew) {
+    if (
+      Object.keys(jobs).includes(credit.job) &&
+      validDepartments.includes(credit.department)
+    ) {
+      persons.set(credit.id + '-' + jobs[credit.job], {
+        job: jobs[credit.job],
+        person: {
+          connectOrCreate: {
+            create: { name: credit.name, original_id: credit.id },
+            where: { original_id: credit.id },
+          },
+        },
+      })
+    }
+  }
+
+  console.log(JSON.stringify(Array.from(persons.values()), null, 2))
+
+  return Array.from(persons.values())
+}
+
 export const action: ActionFunction = async ({ request }) => {
   const tmdbBaseUrl = 'https://api.themoviedb.org/3/movie'
   const form = await request.formData()
 
-  const imdbId = form.get('imdb')
+  const imdbIdInput = form.get('imdb')
+  const imdbId = imdbIdInput?.toString().match(/tt\d+/)?.[0]
   const rating = Number(form.get('rating'))
   const date = form.get('date')
     ? new Date(form.get('date') as string).toISOString()
@@ -21,49 +73,7 @@ export const action: ActionFunction = async ({ request }) => {
     `${tmdbBaseUrl}/${imdbId}/credits?api_key=${process.env.TMDB_API_KEY}`
   )
   const credits = await creditsResponse.json()
-
-  let persons = []
-
-  for (const cast of credits.cast) {
-    persons.push({
-      job: 'cast' as job,
-      person: {
-        connectOrCreate: {
-          create: { name: cast.name, original_id: cast.id },
-          where: { original_id: cast.id },
-        },
-      },
-    })
-  }
-
-  const validDepartments = ['Writing', 'Sound', 'Production', 'Directing']
-
-  const jobs: Record<string, job> = {
-    Screenplay: 'writer',
-    Writer: 'writer',
-    'Original Music Composer': 'composer',
-    Producer: 'producer',
-    'Associate Producer': 'producer',
-    'Executive Producer': 'producer',
-    Director: 'director',
-  }
-
-  for (const credit of credits.crew) {
-    if (
-      Object.keys(jobs).includes(credit.job) &&
-      validDepartments.includes(credit.department)
-    ) {
-      persons.push({
-        job: jobs[credit.job as keyof typeof jobs],
-        person: {
-          connectOrCreate: {
-            create: { name: credit.name, original_id: credit.id },
-            where: { original_id: credit.id },
-          },
-        },
-      })
-    }
-  }
+  const persons = getCastAndCrew(credits.cast, credits.crew)
 
   const fields = {
     data: {
