@@ -63,6 +63,7 @@ export default function MoviePage() {
               <Link
                 className="text-blue-700 underline"
                 to={`/person/${person.id}`}
+                prefetch="intent"
               >
                 {person.name}
               </Link>
