@@ -1,76 +1,28 @@
-import { job } from '@prisma/client'
 import { ActionFunction, redirect } from 'remix'
+import { getCastAndCrew, imdbId } from '~/utils/addMovie.server'
 import { db } from '~/utils/db.server'
 
-const validDepartments = ['Writing', 'Sound', 'Production', 'Directing']
-const jobs: Record<string, job> = {
-  Screenplay: 'writer',
-  Writer: 'writer',
-  'Original Music Composer': 'composer',
-  Producer: 'producer',
-  'Associate Producer': 'producer',
-  'Executive Producer': 'producer',
-  Director: 'director',
-}
+const tmdbBaseUrl = 'https://api.themoviedb.org/3/movie'
+const tmdbKey = process.env.TMDB_API_KEY
 
-const getCastAndCrew = (
-  cast: Array<{ name: string; id: number }>,
-  crew: Array<{ name: string; id: number; job: job; department: string }>
-) => {
-  const persons = new Map()
+const tmdbFetch = async (route: string) => {
+  const response = await fetch(`${tmdbBaseUrl}${route}?api_key=${tmdbKey}`)
+  const data = await response.json()
 
-  for (const credit of cast) {
-    persons.set(credit.id + '-cast', {
-      job: 'cast' as job,
-      person: {
-        connectOrCreate: {
-          create: { name: credit.name, original_id: credit.id },
-          where: { original_id: credit.id },
-        },
-      },
-    })
-  }
-
-  for (const credit of crew) {
-    if (
-      Object.keys(jobs).includes(credit.job) &&
-      validDepartments.includes(credit.department)
-    ) {
-      persons.set(credit.id + '-' + jobs[credit.job], {
-        job: jobs[credit.job],
-        person: {
-          connectOrCreate: {
-            create: { name: credit.name, original_id: credit.id },
-            where: { original_id: credit.id },
-          },
-        },
-      })
-    }
-  }
-
-  return Array.from(persons.values())
+  return data
 }
 
 export const action: ActionFunction = async ({ request }) => {
-  const tmdbBaseUrl = 'https://api.themoviedb.org/3/movie'
   const form = await request.formData()
 
-  const imdbIdInput = form.get('imdb')
-  const imdbId = imdbIdInput?.toString().match(/tt\d+/)?.[0]
+  const id = imdbId(form.get('imdb'))
   const rating = Number(form.get('rating'))
   const date = form.get('date')
     ? new Date(form.get('date') as string).toISOString()
     : new Date().toISOString()
 
-  const movieResponse = await fetch(
-    `${tmdbBaseUrl}/${imdbId}?api_key=${process.env.TMDB_API_KEY}`
-  )
-  const movie = await movieResponse.json()
-
-  const creditsResponse = await fetch(
-    `${tmdbBaseUrl}/${imdbId}/credits?api_key=${process.env.TMDB_API_KEY}`
-  )
-  const credits = await creditsResponse.json()
+  const movie = await tmdbFetch(`/${id}`)
+  const credits = await tmdbFetch(`/${id}/credits`)
   const persons = getCastAndCrew(credits.cast, credits.crew)
 
   const fields = {
