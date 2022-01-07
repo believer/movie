@@ -1,5 +1,11 @@
 import { genre, job, movie, person, seen } from '@prisma/client'
-import { Link, LoaderFunction, useLoaderData } from 'remix'
+import {
+  ActionFunction,
+  Link,
+  LoaderFunction,
+  redirect,
+  useLoaderData,
+} from 'remix'
 import Poster from '~/components/poster'
 import { H1, H2 } from '~/components/typography'
 import { db } from '~/utils/db.server'
@@ -45,6 +51,20 @@ export let loader: LoaderFunction = async ({ params }) => {
   return { movie, cast, crew }
 }
 
+export const action: ActionFunction = async ({ request }) => {
+  const form = await request.formData()
+  const id = Number(form.get('id'))
+
+  await db.seen.create({
+    data: {
+      date: new Date().toISOString(),
+      movie_id: id,
+    },
+  })
+
+  return redirect(`/movie/${id}`)
+}
+
 export default function MoviePage() {
   const { movie, cast, crew } = useLoaderData<LoaderData>()
 
@@ -73,6 +93,12 @@ export default function MoviePage() {
                 <li key={date}>{date}</li>
               ))}
           </ul>
+          <form method="post">
+            <input type="hidden" value={movie.id} name="id" />
+            <button className="bg-gray-200 px-2 py-1 rounded" type="submit">
+              Add new watch
+            </button>
+          </form>
         </div>
         <div className="lg:col-start-4 lg:col-end-5">
           <H2>Cast</H2>
