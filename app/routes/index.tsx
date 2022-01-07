@@ -64,12 +64,20 @@ export default function Index() {
   return (
     <div className="grid grid-feed my-10">
       <div className="col-start-3 col-end-3 mb-5 flex justify-between">
-        <Link
-          className="bg-blue-600 text-white px-2 py-1 rounded text-sm hover:bg-blue-500"
-          to="/movie/new"
-        >
-          Add new movie
-        </Link>
+        <div className="flex space-x-2">
+          <Link
+            className="bg-blue-600 text-white px-2 py-1 rounded text-sm hover:bg-blue-500"
+            to="/movie/new"
+          >
+            Add new movie
+          </Link>
+          <Link
+            className="bg-blue-600 text-white px-2 py-1 rounded text-sm hover:bg-blue-500"
+            to="/search"
+          >
+            Search
+          </Link>
+        </div>
         <form method="post" ref={formRef}>
           <select
             id=""
