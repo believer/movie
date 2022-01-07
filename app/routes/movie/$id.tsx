@@ -1,6 +1,7 @@
 import { genre, job, movie, person, seen } from '@prisma/client'
 import { Link, LoaderFunction, useLoaderData } from 'remix'
 import Poster from '~/components/poster'
+import { H1, H2 } from '~/components/typography'
 import { db } from '~/utils/db.server'
 
 const dateFormatter = new Intl.DateTimeFormat('sv-SE')
@@ -52,12 +53,12 @@ export default function MoviePage() {
           <div className="w-60 mb-5">
             <Poster image={movie.poster} />
           </div>
-          <h1 className="text-4xl font-bold">{movie.title}</h1>
+          <H1>{movie.title}</H1>
           <div className="mt-2 mb-4 flex text-sm text-gray-600">
             {movie.movie_genre.map(({ genre }) => genre.name).join(', ')}
           </div>
           <p>{movie.overview}</p>
-          <h2 className="text-lg font-semibold mt-4 mb-2">Seen</h2>
+          <H2>Seen</H2>
           <ul className="mb-4 text-sm text-gray-600">
             {movie.seen
               .map(({ date }) => dateFormatter.format(new Date(date)))
@@ -67,7 +68,7 @@ export default function MoviePage() {
           </ul>
         </div>
         <div className="lg:col-start-4 lg:col-end-5">
-          <h2 className="text-lg font-semibold mb-4">Cast</h2>
+          <H2>Cast</H2>
           <ul className="grid grid-cols-2 lg:grid-cols-3 gap-y-1">
             {cast.map(({ person }) => (
               <li key={person.id}>
@@ -81,7 +82,7 @@ export default function MoviePage() {
               </li>
             ))}
           </ul>
-          <h2 className="text-lg font-semibold my-4">Crew</h2>
+          <H2>Crew</H2>
           <ul className="grid grid-cols-2 lg:grid-cols-3 gap-y-1">
             {crew.map(({ job, person }) => (
               <li key={person.id} className="flex items-center space-x-2">

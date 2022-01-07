@@ -1,16 +1,19 @@
-import { movie, person } from '@prisma/client'
+import { job, movie, person } from '@prisma/client'
 import { Link, LoaderFunction, useLoaderData } from 'remix'
+import { H1, H2 } from '~/components/typography'
 import { db } from '~/utils/db.server'
 
 type LoaderData = {
-  person: person & { movie_person: Array<{ movie: movie }> }
+  name: string
+  cast: Array<{ movie: movie; job: job }>
+  crew: Array<{ movie: movie; job: job }>
 }
 
 export let loader: LoaderFunction = async ({ params }) => {
   const person = await db.person.findUnique({
     where: { id: Number(params.id) },
     include: {
-      movie_person: { select: { movie: true } },
+      movie_person: { select: { job: true, movie: true } },
     },
   })
 
@@ -18,23 +21,58 @@ export let loader: LoaderFunction = async ({ params }) => {
     throw new Error('No person found')
   }
 
-  return { person }
+  const cast = person.movie_person.filter(({ job }) => job === 'cast')
+  const crew = person.movie_person.filter(({ job }) => job !== 'cast')
+
+  return { name: person.name, cast, crew }
 }
 
 export default function MoviePage() {
-  const { person } = useLoaderData<LoaderData>()
+  const { name, cast, crew } = useLoaderData<LoaderData>()
 
   return (
     <div className="mx-auto max-w-4xl my-8">
-      <Link to="/">Back</Link>
-      <h1 className="text-4xl font-bold">{person.name}</h1>
-      <ul className="mt-4 grid grid-cols-3">
-        {person.movie_person.map(({ movie }) => (
-          <li key={movie.id}>
-            <Link to={`/movie/${movie.id}`}>{movie.title}</Link>
-          </li>
-        ))}
-      </ul>
+      <div className="mb-10">
+        <Link to="/">Back</Link>
+      </div>
+      <H1>{name}</H1>
+      {cast.length > 0 && (
+        <>
+          <H2>Cast</H2>
+          <ul className="mt-4 grid grid-cols-3">
+            {cast.map(({ movie }) => (
+              <li key={movie.id}>
+                <Link
+                  className="text-blue-700 underline text-sm"
+                  to={`/movie/${movie.id}`}
+                  prefetch="intent"
+                >
+                  {movie.title}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+      {crew.length > 0 && (
+        <>
+          <H2>Crew</H2>
+          <ul className="mt-4 grid grid-cols-3">
+            {crew.map(({ job, movie }) => (
+              <li key={movie.id} className="flex items-center space-x-2">
+                <Link
+                  className="text-blue-700 underline text-sm"
+                  to={`/movie/${movie.id}`}
+                  prefetch="intent"
+                >
+                  {movie.title}
+                </Link>
+                <span className="text-xs text-gray-500">{job}</span>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
     </div>
   )
 }
