@@ -12,18 +12,25 @@ type LoaderData = {
     movie_genre: Array<{ genre: genre }>
     seen: Array<Pick<seen, 'date'>>
   }
+  cast: Array<{ person: person; job: job }>
+  crew: Array<{ person: person; job: job }>
 }
 
 export let loader: LoaderFunction = async ({ params }) => {
+  const id = Number(params.id)
   const movie = await db.movie.findUnique({
-    where: { id: Number(params.id) },
+    where: { id },
     include: {
       rating: true,
       seen: { select: { date: true } },
       movie_genre: { select: { genre: true } },
       movie_person: {
         select: { job: true, person: true },
-        orderBy: { id: 'desc' },
+        orderBy: {
+          person: {
+            movie_person: { _count: 'desc' },
+          },
+        },
       },
     },
   })
@@ -32,14 +39,14 @@ export let loader: LoaderFunction = async ({ params }) => {
     throw new Error('No movie found')
   }
 
-  return { movie }
+  const cast = movie.movie_person.filter(({ job }) => job === 'cast')
+  const crew = movie.movie_person.filter(({ job }) => job !== 'cast')
+
+  return { movie, cast, crew }
 }
 
 export default function MoviePage() {
-  const { movie } = useLoaderData<LoaderData>()
-
-  const cast = movie.movie_person.filter(({ job }) => job === 'cast')
-  const crew = movie.movie_person.filter(({ job }) => job !== 'cast')
+  const { movie, cast, crew } = useLoaderData<LoaderData>()
 
   return (
     <div className="my-10 mx-5 lg:mx-0">
