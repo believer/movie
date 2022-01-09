@@ -1,4 +1,4 @@
-import { genre, job, movie, person, seen } from '@prisma/client'
+import { genre, job, movie, person, rating, seen } from '@prisma/client'
 import {
   ActionFunction,
   Link,
@@ -14,6 +14,7 @@ const dateFormatter = new Intl.DateTimeFormat('sv-SE')
 
 type LoaderData = {
   movie: movie & {
+    rating: Array<rating>
     movie_person: Array<{ person: person; job: job }>
     movie_genre: Array<{ genre: genre }>
     seen: Array<Pick<seen, 'date'>>
@@ -68,6 +69,8 @@ export const action: ActionFunction = async ({ request }) => {
 export default function MoviePage() {
   const { movie, cast, crew } = useLoaderData<LoaderData>()
 
+  const rating = movie.rating?.[0].rating
+
   return (
     <div className="my-10 mx-5 lg:mx-0">
       <div className="grid lg:grid-movie gap-8">
@@ -81,16 +84,26 @@ export default function MoviePage() {
             <Poster image={movie.poster} />
           </div>
           <H1>{movie.title}</H1>
-          <div className="mt-2 mb-4 flex text-sm text-gray-600">
+          <div className="mt-2 mb-4 flex text-xs text-gray-600">
             {movie.movie_genre.map(({ genre }) => genre.name).join(', ')}
           </div>
+          {rating && (
+            <div className="flex space-x-2 mb-4 items-center">
+              <div>{[...Array(rating).keys()].map(() => '⭐️')}</div>
+              <div className="text-sm text-gray-500 font-bold">
+                {rating} / 10
+              </div>
+            </div>
+          )}
           <p>{movie.overview}</p>
           <H2>Seen</H2>
           <ul className="mb-4 text-sm text-gray-600">
             {movie.seen
               .map(({ date }) => dateFormatter.format(new Date(date)))
               .map((date) => (
-                <li key={date}>{date}</li>
+                <li className="tabular-nums" key={date}>
+                  {date}
+                </li>
               ))}
           </ul>
           <form method="post">

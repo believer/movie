@@ -3,5 +3,9 @@ export const H1 = ({ children }: { children: string }) => {
 }
 
 export const H2 = ({ children }: { children: string }) => {
-  return <h2 className="text-lg font-semibold my-4">{children}</h2>
+  return (
+    <h2 className="text-lg font-semibold my-4 border-b pb-4 border-dashed border-gray-500">
+      {children}
+    </h2>
+  )
 }
