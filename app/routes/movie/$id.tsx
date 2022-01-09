@@ -69,7 +69,7 @@ export const action: ActionFunction = async ({ request }) => {
 export default function MoviePage() {
   const { movie, cast, crew } = useLoaderData<LoaderData>()
 
-  const rating = movie.rating?.[0].rating
+  const rating = movie.rating[0]?.rating
 
   return (
     <div className="my-10 mx-5 lg:mx-0">
