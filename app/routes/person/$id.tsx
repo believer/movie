@@ -31,48 +31,50 @@ export default function MoviePage() {
   const { name, cast, crew } = useLoaderData<LoaderData>()
 
   return (
-    <div className="mx-auto max-w-4xl my-8">
-      <div className="mb-10">
-        <Link to="/">Back</Link>
+    <div className="my-8 mx-5">
+      <div className="grid grid-cols-1">
+        <div className="mb-10">
+          <Link to="/">Back</Link>
+        </div>
+        <H1>{name}</H1>
+        {cast.length > 0 && (
+          <>
+            <H2>Cast</H2>
+            <ul className="grid grid-cols-2 lg:grid-cols-3 gap-1">
+              {cast.map(({ movie }) => (
+                <li key={movie.id}>
+                  <Link
+                    className="text-blue-700 underline text-sm"
+                    to={`/movie/${movie.id}`}
+                    prefetch="intent"
+                  >
+                    {movie.title}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+        {crew.length > 0 && (
+          <>
+            <H2>Crew</H2>
+            <ul className="mt-4 grid grid-cols-2 lg:grid-cols-3 gap-1">
+              {crew.map(({ job, movie }) => (
+                <li key={movie.id} className="flex items-center space-x-2">
+                  <Link
+                    className="text-blue-700 underline text-sm"
+                    to={`/movie/${movie.id}`}
+                    prefetch="intent"
+                  >
+                    {movie.title}
+                  </Link>
+                  <span className="text-xs text-gray-500">{job}</span>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
       </div>
-      <H1>{name}</H1>
-      {cast.length > 0 && (
-        <>
-          <H2>Cast</H2>
-          <ul className="mt-4 grid grid-cols-3">
-            {cast.map(({ movie }) => (
-              <li key={movie.id}>
-                <Link
-                  className="text-blue-700 underline text-sm"
-                  to={`/movie/${movie.id}`}
-                  prefetch="intent"
-                >
-                  {movie.title}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
-      {crew.length > 0 && (
-        <>
-          <H2>Crew</H2>
-          <ul className="mt-4 grid grid-cols-3">
-            {crew.map(({ job, movie }) => (
-              <li key={movie.id} className="flex items-center space-x-2">
-                <Link
-                  className="text-blue-700 underline text-sm"
-                  to={`/movie/${movie.id}`}
-                  prefetch="intent"
-                >
-                  {movie.title}
-                </Link>
-                <span className="text-xs text-gray-500">{job}</span>
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
     </div>
   )
 }

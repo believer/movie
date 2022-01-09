@@ -70,12 +70,12 @@ export default function MoviePage() {
 
   return (
     <div className="my-10 mx-5 lg:mx-0">
-      <div className="grid lg:grid-movie gap-5">
+      <div className="grid lg:grid-movie gap-8">
         <div className="lg:col-start-3 lg:col-end-4">
           <Link to="/">Back</Link>
         </div>
       </div>
-      <div className="grid grid-cols-1 lg:grid-movie gap-5 mt-8">
+      <div className="grid grid-cols-1 lg:grid-movie gap-8 mt-8">
         <div className="lg:col-start-3 lg:col-end-4">
           <div className="w-60 mb-5">
             <Poster image={movie.poster} />
