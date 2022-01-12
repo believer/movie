@@ -5,7 +5,7 @@
   "license": "",
   "scripts": {
     "build": "npm run build:css && remix build",
-    "dev": "node --trace-warnings -r dotenv/config node_modules/.bin/remix dev",
+    "dev": "node -r dotenv/config node_modules/.bin/remix dev",
     "postinstall": "remix setup node",
     "deploy": "npm run build && fly deploy --remote-only",
     "start": "remix-serve build",
