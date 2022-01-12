@@ -36,7 +36,11 @@ export let loader: LoaderFunction = async ({ params, request }) => {
     where: { id },
     include: {
       rating: { where: { user_id } },
-      seen: { select: { date: true }, where: { user_id } },
+      seen: {
+        select: { date: true },
+        where: { user_id },
+        orderBy: { date: 'desc' },
+      },
       movie_genre: { select: { genre: true } },
       movie_person: {
         select: { job: true, person: true },
