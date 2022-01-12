@@ -19,9 +19,11 @@ export const loader: LoaderFunction = async ({ request }) => {
   const url = new URL(request.url)
   const query = url.searchParams.get('query') ?? ''
 
+  console.log(decodeURI(query))
+
   const results = await db.movie.findMany({
     select: { id: true, title: true, release_date: true },
-    where: { title: { search: query } },
+    where: { title: { mode: 'insensitive', contains: decodeURI(query) } },
     orderBy: { release_date: 'desc' },
   })
 
@@ -30,9 +32,9 @@ export const loader: LoaderFunction = async ({ request }) => {
 
 export const action: ActionFunction = async ({ request }) => {
   const form = await request.formData()
-  const query = form.get('query')
+  const query = form.get('query')?.toString() ?? ''
 
-  return redirect(`?query=${query}`)
+  return redirect(`?query=${encodeURI(query)}`)
 }
 
 export default function SearchPage() {
