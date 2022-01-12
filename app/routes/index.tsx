@@ -1,11 +1,12 @@
-import type { movie, rating, seen } from '@prisma/client'
+import type { movie, rating, seen, user } from '@prisma/client'
 import React from 'react'
-import type { LoaderFunction } from 'remix'
-import { Link, useLoaderData } from 'remix'
+import { Link, LoaderFunction, redirect, useLoaderData } from 'remix'
 import Poster from '~/components/poster'
 import { db } from '~/utils/db.server'
+import { getUser } from '~/utils/session.server'
 
 type LoaderData = {
+  user: user | null
   year: string
   moviesInYear: number
   newMoviesInYear: number
@@ -17,12 +18,19 @@ type LoaderData = {
 }
 
 export let loader: LoaderFunction = async ({ request }) => {
+  const user = await getUser(request)
+
+  if (!user) {
+    throw redirect('/login')
+  }
+
   const url = new URL(request.url)
   const year =
     url.searchParams.get('year') ?? new Date().getFullYear().toString()
 
   const filterByYear = {
     where: {
+      user_id: Number(user?.id),
       date: {
         gte: new Date(`${year}-01-01`),
         lte: new Date(`${year}-12-31`),
@@ -37,7 +45,7 @@ export let loader: LoaderFunction = async ({ request }) => {
       where: {
         seen: {
           every: {
-            date: filterByYear.where.date,
+            ...filterByYear.where,
           },
         },
       },
@@ -52,6 +60,7 @@ export let loader: LoaderFunction = async ({ request }) => {
       orderBy: { date: 'desc' },
       ...filterByYear,
     }),
+    user,
   }
 
   return data
@@ -63,7 +72,7 @@ export default function Index() {
 
   return (
     <div className="grid grid-feed my-10">
-      <div className="col-start-3 col-end-3 mb-5 flex justify-between">
+      <div className="col-start-3 col-end-3 mb-5 flex justify-between items-center">
         <div className="flex space-x-2">
           <Link
             className="bg-blue-600 text-white px-2 py-1 rounded text-sm hover:bg-blue-500"
@@ -78,26 +87,33 @@ export default function Index() {
             Search
           </Link>
         </div>
-        <form method="post" ref={formRef}>
-          <select
-            id=""
-            name="year"
-            defaultValue={data.year}
-            onChange={() => formRef.current?.submit()}
-          >
-            <option value="2022">2022</option>
-            <option value="2021">2021</option>
-            <option value="2020">2020</option>
-            <option value="2019">2019</option>
-            <option value="2018">2018</option>
-            <option value="2017">2017</option>
-            <option value="2016">2016</option>
-            <option value="2015">2015</option>
-            <option value="2014">2014</option>
-            <option value="2013">2013</option>
-            <option value="2012">2012</option>
-          </select>
-        </form>
+        <div className="flex items-center space-x-2">
+          <form method="post" ref={formRef}>
+            <select
+              id=""
+              name="year"
+              defaultValue={data.year}
+              onChange={() => formRef.current?.submit()}
+            >
+              <option value="2022">2022</option>
+              <option value="2021">2021</option>
+              <option value="2020">2020</option>
+              <option value="2019">2019</option>
+              <option value="2018">2018</option>
+              <option value="2017">2017</option>
+              <option value="2016">2016</option>
+              <option value="2015">2015</option>
+              <option value="2014">2014</option>
+              <option value="2013">2013</option>
+              <option value="2012">2012</option>
+            </select>
+          </form>
+          <form action="/logout" method="post">
+            <button type="submit" className="button">
+              Logout
+            </button>
+          </form>
+        </div>
       </div>
       {data.moviesInYear > 0 ? (
         <>

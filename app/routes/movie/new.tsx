@@ -1,6 +1,7 @@
 import { ActionFunction, redirect } from 'remix'
 import { getCastAndCrew, imdbId } from '~/utils/addMovie.server'
 import { db } from '~/utils/db.server'
+import { requireUserId } from '~/utils/session.server'
 
 const tmdbFetch = async (route: string) => {
   const tmdbBaseUrl = 'https://api.themoviedb.org/3/movie'
@@ -12,6 +13,7 @@ const tmdbFetch = async (route: string) => {
 }
 
 export const action: ActionFunction = async ({ request }) => {
+  const userId = await requireUserId(request)
   const form = await request.formData()
 
   const id = imdbId(form.get('imdb'))
@@ -34,10 +36,10 @@ export const action: ActionFunction = async ({ request }) => {
       tagline: movie.tagline,
       title: movie.title,
       rating: {
-        create: [{ rating }],
+        create: [{ rating, user_id: userId }],
       },
       seen: {
-        create: [{ date }],
+        create: [{ date, user_id: userId }],
       },
       movie_genre: {
         create: movie.genres.map(({ name }: { name: string }) => ({

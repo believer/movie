@@ -9,6 +9,7 @@ import {
 import Poster from '~/components/poster'
 import { H1, H2 } from '~/components/typography'
 import { db } from '~/utils/db.server'
+import { getUserId } from '~/utils/session.server'
 
 const dateFormatter = new Intl.DateTimeFormat('sv-SE')
 
@@ -23,13 +24,19 @@ type LoaderData = {
   crew: Array<{ person: person; job: job }>
 }
 
-export let loader: LoaderFunction = async ({ params }) => {
+export let loader: LoaderFunction = async ({ params, request }) => {
+  const user_id = await getUserId(request)
   const id = Number(params.id)
+
+  if (!user_id) {
+    throw redirect('/login')
+  }
+
   const movie = await db.movie.findUnique({
     where: { id },
     include: {
-      rating: true,
-      seen: { select: { date: true } },
+      rating: { where: { user_id } },
+      seen: { select: { date: true }, where: { user_id } },
       movie_genre: { select: { genre: true } },
       movie_person: {
         select: { job: true, person: true },
@@ -55,11 +62,17 @@ export let loader: LoaderFunction = async ({ params }) => {
 export const action: ActionFunction = async ({ request }) => {
   const form = await request.formData()
   const id = Number(form.get('id'))
+  const user_id = await getUserId(request)
+
+  if (!user_id) {
+    throw redirect('/login')
+  }
 
   await db.seen.create({
     data: {
       date: new Date().toISOString(),
       movie_id: id,
+      user_id,
     },
   })
 
@@ -96,22 +109,26 @@ export default function MoviePage() {
             </div>
           )}
           <p>{movie.overview}</p>
-          <H2>Seen</H2>
-          <ul className="mb-4 text-sm text-gray-600">
-            {movie.seen
-              .map(({ date }) => dateFormatter.format(new Date(date)))
-              .map((date) => (
-                <li className="tabular-nums" key={date}>
-                  {date}
-                </li>
-              ))}
-          </ul>
-          <form method="post">
-            <input type="hidden" value={movie.id} name="id" />
-            <button className="bg-gray-200 px-2 py-1 rounded" type="submit">
-              Add new watch
-            </button>
-          </form>
+          {movie.seen.length > 0 && (
+            <>
+              <H2>Seen</H2>
+              <ul className="mb-4 text-sm text-gray-600">
+                {movie.seen
+                  .map(({ date }) => dateFormatter.format(new Date(date)))
+                  .map((date) => (
+                    <li className="tabular-nums" key={date}>
+                      {date}
+                    </li>
+                  ))}
+              </ul>
+              <form method="post">
+                <input type="hidden" value={movie.id} name="id" />
+                <button className="bg-gray-200 px-2 py-1 rounded" type="submit">
+                  Add new watch
+                </button>
+              </form>
+            </>
+          )}
         </div>
         <div className="lg:col-start-4 lg:col-end-5">
           <H2>Cast</H2>
