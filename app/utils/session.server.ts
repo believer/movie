@@ -50,31 +50,12 @@ export function getUserSession(request: Request) {
 export async function getUserId(request: Request) {
   const session = await getUserSession(request)
   const userId = session.get('userId')
-  if (!userId || typeof userId !== 'string') return null
-  return Number(userId)
-}
 
-export async function requireUserId(
-  request: Request,
-  redirectTo: string = new URL(request.url).pathname
-) {
-  const session = await getUserSession(request)
-  const userId = session.get('userId')
-  if (!userId || typeof userId !== 'string') {
-    const searchParams = new URLSearchParams([['redirectTo', redirectTo]])
-    throw redirect(`/login?${searchParams}`)
+  if (!userId) {
+    return null
   }
-  return Number(userId)
-}
 
-export async function createUserSession(userId: number, redirectTo: string) {
-  const session = await storage.getSession()
-  session.set('userId', userId)
-  return redirect(redirectTo, {
-    headers: {
-      'Set-Cookie': await storage.commitSession(session),
-    },
-  })
+  return Number(userId)
 }
 
 export async function getUser(request: Request) {
@@ -95,8 +76,35 @@ export async function getUser(request: Request) {
   }
 }
 
+export async function requireUserId(
+  request: Request,
+  redirectTo: string = new URL(request.url).pathname
+) {
+  const session = await getUserSession(request)
+  const userId = session.get('userId')
+
+  if (!userId) {
+    const searchParams = new URLSearchParams([['redirectTo', redirectTo]])
+    throw redirect(`/login?${searchParams}`)
+  }
+
+  return Number(userId)
+}
+
+export async function createUserSession(userId: number, redirectTo: string) {
+  const session = await storage.getSession()
+  session.set('userId', userId)
+
+  return redirect(redirectTo, {
+    headers: {
+      'Set-Cookie': await storage.commitSession(session),
+    },
+  })
+}
+
 export async function logout(request: Request) {
   const session = await storage.getSession(request.headers.get('Cookie'))
+
   return redirect('/login', {
     headers: {
       'Set-Cookie': await storage.destroySession(session),
