@@ -1,5 +1,6 @@
 import type { ActionFunction } from 'remix'
 import { json, useActionData, useSearchParams } from 'remix'
+import { Input } from '~/components/form'
 import { db } from '~/utils/db.server'
 import { createUserSession, login, register } from '~/utils/session.server'
 
@@ -104,9 +105,9 @@ export default function Login() {
   const [searchParams] = useSearchParams()
 
   return (
-    <div className="container">
-      <div className="content" data-light="">
-        <h1>Login</h1>
+    <div className="bg-gray-100 h-screen flex items-center justify-center flex-col">
+      <h1 className="text-6xl font-bold">🍿</h1>
+      <div className="w-96 p-5 rounded-lg bg-white shadow-lg mt-10">
         <form
           method="post"
           aria-describedby={
@@ -118,10 +119,11 @@ export default function Login() {
             name="redirectTo"
             value={searchParams.get('redirectTo') ?? undefined}
           />
-          <fieldset>
+          <fieldset className="flex justify-center">
             <legend className="sr-only">Login or Register?</legend>
-            <label>
+            <label className="mr-4 text-gray-500 text-sm font-semibold">
               <input
+                className="mr-2"
                 type="radio"
                 name="loginType"
                 value="login"
@@ -129,24 +131,24 @@ export default function Login() {
                   !actionData?.fields?.loginType ||
                   actionData?.fields?.loginType === 'login'
                 }
-              />{' '}
+              />
               Login
             </label>
-            <label>
+            <label className="text-gray-500 text-sm font-semibold">
               <input
+                className="mr-2"
                 type="radio"
                 name="loginType"
                 value="register"
                 defaultChecked={actionData?.fields?.loginType === 'register'}
-              />{' '}
+              />
               Register
             </label>
           </fieldset>
-          <div>
-            <label htmlFor="username-input">Username</label>
-            <input
-              type="text"
-              id="username-input"
+          <div className="my-5">
+            <Input
+              type="email"
+              label="Username"
               name="username"
               defaultValue={actionData?.fields?.username}
               aria-invalid={Boolean(actionData?.fieldErrors?.username)}
@@ -165,16 +167,13 @@ export default function Login() {
             ) : null}
           </div>
           <div>
-            <label htmlFor="password-input">Password</label>
-            <input
-              id="password-input"
+            <Input
+              type="password"
+              label="Password"
               name="password"
               defaultValue={actionData?.fields?.password}
-              type="password"
-              aria-invalid={
-                Boolean(actionData?.fieldErrors?.password) || undefined
-              }
-              aria-describedby={
+              invalid={Boolean(actionData?.fieldErrors?.password) || undefined}
+              describedBy={
                 actionData?.fieldErrors?.password ? 'password-error' : undefined
               }
             />
@@ -188,14 +187,17 @@ export default function Login() {
               </p>
             ) : null}
           </div>
-          <div id="form-error-message">
+          <div>
             {actionData?.formError ? (
-              <p className="form-validation-error" role="alert">
+              <p className="text-sm text-red-600 mt-2" role="alert">
                 {actionData?.formError}
               </p>
             ) : null}
           </div>
-          <button type="submit" className="button">
+          <button
+            className="bg-brandBlue-500 w-full p-2 text-white rounded mt-4 text-sm"
+            type="submit"
+          >
             Submit
           </button>
         </form>

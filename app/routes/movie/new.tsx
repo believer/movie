@@ -1,4 +1,5 @@
-import { ActionFunction, redirect } from 'remix'
+import { ActionFunction, Link, redirect } from 'remix'
+import { Input } from '~/components/form'
 import { getCastAndCrew, imdbId } from '~/utils/addMovie.server'
 import { db } from '~/utils/db.server'
 import { requireUserId } from '~/utils/session.server'
@@ -60,43 +61,23 @@ export const action: ActionFunction = async ({ request }) => {
 export default function AddMoviePage() {
   return (
     <div className="max-w-sm md:mx-auto my-10 mx-5">
+      <Link className="mb-5 block text-brandBlue-600 underline text-sm" to="/">
+        Back
+      </Link>
       <form method="post">
         <div className="mb-4">
-          <label>
-            <span className="block text-sm font-semibold mb-2">IMDb Id</span>
-            <input
-              className="border border-gray-700 w-full px-2 py-1 rounded-sm"
-              type="text"
-              name="imdb"
-            />
-          </label>
+          <Input label="IMDb ID" name="imdb" />
         </div>
         <div className="mb-4">
-          <label>
-            <span className="block text-sm font-semibold mb-2">Rating</span>
-            <input
-              className="w-full border border-gray-700 px-2 py-1"
-              min="0"
-              max="10"
-              type="number"
-              name="rating"
-            />
-          </label>
+          <Input type="number" label="Rating" name="rating" max="10" min="0" />
         </div>
         <div className="mb-4">
-          <label>
-            <span className="block text-sm font-semibold mb-2">Date</span>
-            <input
-              className="border border-gray-700 w-full px-2 py-1"
-              type="datetime-local"
-              name="date"
-            />
-          </label>
+          <Input type="datetime-local" label="Date" name="date" />
         </div>
         <div>
           <button
             type="submit"
-            className="w-full bg-blue-600 py-2 px-2 rounded text-white"
+            className="w-full bg-brandBlue-500 text-sm p-2 rounded text-white"
           >
             Add movie
           </button>

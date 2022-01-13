@@ -45,7 +45,9 @@ export default function SearchPage() {
 
   return (
     <div className="mx-auto max-w-xl my-10">
-      <Link to="/">Back</Link>
+      <Link className="text-brandBlue-600 underline text-sm" to="/">
+        Back
+      </Link>
       <form className="my-5" method="post">
         <input
           className="border border-gray-700 w-full px-2 py-1"

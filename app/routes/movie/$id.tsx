@@ -6,6 +6,7 @@ import {
   redirect,
   useLoaderData,
 } from 'remix'
+import { Input } from '~/components/form'
 import Poster from '~/components/poster'
 import { H1, H2 } from '~/components/typography'
 import { db } from '~/utils/db.server'
@@ -109,7 +110,9 @@ export default function MoviePage() {
     <div className="my-10 mx-5 lg:mx-0">
       <div className="grid lg:grid-movie gap-8">
         <div className="lg:col-start-3 lg:col-end-4">
-          <Link to="/">Back</Link>
+          <Link className="text-brandBlue-600 underline text-sm" to="/">
+            Back
+          </Link>
         </div>
       </div>
       <div className="grid grid-cols-1 lg:grid-movie gap-8 mt-8">
@@ -134,18 +137,12 @@ export default function MoviePage() {
               <input type="hidden" value={movie.id} name="id" />
               <input type="hidden" value="rating" name="type" />
               <div className="mb-2">
-                <label>
-                  <span className="block mb-2 text-sm font-semibold">
-                    Rating
-                  </span>
-                  <input
-                    className="w-full border border-gray-700 px-2 py-1"
-                    type="number"
-                    name="rating"
-                  />
-                </label>
+                <Input type="number" label="Rating" name="rating" />
               </div>
-              <button className="bg-gray-200 px-2 py-1 rounded" type="submit">
+              <button
+                className="bg-brandBlueLight-500 text-brandBlueLight-900 text-sm px-4 py-2 rounded"
+                type="submit"
+              >
                 Rate movie
               </button>
             </form>
@@ -170,19 +167,13 @@ export default function MoviePage() {
             <input type="hidden" value="watch" name="type" />
             {!hasSeen && (
               <div className="mb-2">
-                <label>
-                  <span className="block mb-2 text-sm font-semibold">
-                    Watch date
-                  </span>
-                  <input
-                    className="w-full border border-gray-700 px-2 py-1"
-                    type="datetime-local"
-                    name="date"
-                  />
-                </label>
+                <Input type="datetime-local" label="Watch date" name="date" />
               </div>
             )}
-            <button className="bg-gray-200 px-2 py-1 rounded" type="submit">
+            <button
+              className="bg-brandBlueLight-500 text-brandBlueLight-900 text-sm px-4 py-2 rounded"
+              type="submit"
+            >
               {hasSeen ? 'Add new watch' : 'Add to my movies'}
             </button>
           </form>
@@ -193,7 +184,7 @@ export default function MoviePage() {
             {cast.map(({ person }) => (
               <li key={person.id}>
                 <Link
-                  className="text-blue-700 underline text-sm"
+                  className="text-brandBlue-600 underline text-sm"
                   to={`/person/${person.id}`}
                   prefetch="intent"
                 >
@@ -207,7 +198,7 @@ export default function MoviePage() {
             {crew.map(({ job, person }) => (
               <li key={person.id} className="flex items-center space-x-2">
                 <Link
-                  className="text-blue-700 underline text-sm"
+                  className="text-brandBlue-600 underline text-sm"
                   to={`/person/${person.id}`}
                   prefetch="intent"
                 >

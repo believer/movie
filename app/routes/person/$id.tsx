@@ -34,7 +34,9 @@ export default function MoviePage() {
     <div className="my-8 mx-5">
       <div className="grid grid-cols-1">
         <div className="mb-10">
-          <Link to="/">Back</Link>
+          <Link className="text-brandBlue-600 underline text-sm" to="/">
+            Back
+          </Link>
         </div>
         <H1>{name}</H1>
         {cast.length > 0 && (
@@ -44,7 +46,7 @@ export default function MoviePage() {
               {cast.map(({ movie }) => (
                 <li key={movie.id}>
                   <Link
-                    className="text-blue-700 underline text-sm"
+                    className="text-brandBlue-600 underline text-sm"
                     to={`/movie/${movie.id}`}
                     prefetch="intent"
                   >
@@ -62,7 +64,7 @@ export default function MoviePage() {
               {crew.map(({ job, movie }) => (
                 <li key={movie.id} className="flex items-center space-x-2">
                   <Link
-                    className="text-blue-700 underline text-sm"
+                    className="text-brandBlue-600 underline text-sm"
                     to={`/movie/${movie.id}`}
                     prefetch="intent"
                   >

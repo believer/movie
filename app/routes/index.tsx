@@ -4,6 +4,7 @@ import { Link, LoaderFunction, redirect, useLoaderData } from 'remix'
 import Poster from '~/components/poster'
 import { db } from '~/utils/db.server'
 import { getUser } from '~/utils/session.server'
+import md5 from 'md5'
 
 type LoaderData = {
   user: user | null
@@ -80,13 +81,13 @@ export default function Index() {
       <div className="col-start-3 col-end-3 mb-5 flex justify-between items-center">
         <div className="flex space-x-2">
           <Link
-            className="bg-blue-600 text-white px-2 py-1 rounded text-sm hover:bg-blue-500"
+            className="bg-brandBlue-500 text-white px-2 py-1 rounded text-sm"
             to="/movie/new"
           >
             Add new movie
           </Link>
           <Link
-            className="bg-blue-600 text-white px-2 py-1 rounded text-sm hover:bg-blue-500"
+            className="bg-brandBlue-500 text-white px-2 py-1 rounded text-sm"
             to="/search"
           >
             Search
@@ -113,7 +114,13 @@ export default function Index() {
               <option value="2012">2012</option>
             </select>
           </form>
-          <form action="/logout" method="post">
+          <form action="/logout" method="post" className="flex space-x-2">
+            <img
+              className="rounded-full w-8"
+              src={`https://www.gravatar.com/avatar/${md5(
+                data.user?.username
+              )}`}
+            />
             <button type="submit" className="button">
               Logout
             </button>
