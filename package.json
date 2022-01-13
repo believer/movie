@@ -4,7 +4,7 @@
   "description": "",
   "license": "",
   "scripts": {
-    "build": "npm run build:css && npm run re:build && remix build",
+    "build": "npm run build:css && remix build",
     "dev": "node -r dotenv/config node_modules/.bin/remix dev",
     "postinstall": "remix setup node",
     "deploy": "npm run build && fly deploy --remote-only",
