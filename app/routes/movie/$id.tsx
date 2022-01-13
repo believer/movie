@@ -66,6 +66,9 @@ export let loader: LoaderFunction = async ({ params, request }) => {
 export const action: ActionFunction = async ({ request }) => {
   const form = await request.formData()
   const id = Number(form.get('id'))
+  const date = form.get('date')
+    ? new Date(form.get('date') as string).toISOString()
+    : new Date().toISOString()
   const user_id = await getUserId(request)
 
   if (!user_id) {
@@ -74,7 +77,7 @@ export const action: ActionFunction = async ({ request }) => {
 
   await db.seen.create({
     data: {
-      date: new Date().toISOString(),
+      date,
       movie_id: id,
       user_id,
     },
@@ -87,6 +90,7 @@ export default function MoviePage() {
   const { movie, cast, crew } = useLoaderData<LoaderData>()
 
   const rating = movie.rating[0]?.rating
+  const hasSeen = movie.seen.length > 0
 
   return (
     <div className="my-10 mx-5 lg:mx-0">
@@ -113,7 +117,7 @@ export default function MoviePage() {
             </div>
           )}
           <p>{movie.overview}</p>
-          {movie.seen.length > 0 && (
+          {hasSeen && (
             <>
               <H2>Seen</H2>
               <ul className="mb-4 text-sm text-gray-600">
@@ -125,14 +129,24 @@ export default function MoviePage() {
                     </li>
                   ))}
               </ul>
-              <form method="post">
-                <input type="hidden" value={movie.id} name="id" />
-                <button className="bg-gray-200 px-2 py-1 rounded" type="submit">
-                  Add new watch
-                </button>
-              </form>
             </>
           )}
+          <form className="mt-4" method="post">
+            <input type="hidden" value={movie.id} name="id" />
+            {!hasSeen && (
+              <div className="mb-2">
+                <label>
+                  <span className="block mb-2 text-sm font-semibold">
+                    Watch date
+                  </span>
+                  <input type="datetime-local" name="date" />
+                </label>
+              </div>
+            )}
+            <button className="bg-gray-200 px-2 py-1 rounded" type="submit">
+              {hasSeen ? 'Add new watch' : 'Add to my movies'}
+            </button>
+          </form>
         </div>
         <div className="lg:col-start-4 lg:col-end-5">
           <H2>Cast</H2>
