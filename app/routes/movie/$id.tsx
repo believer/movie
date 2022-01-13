@@ -65,23 +65,36 @@ export let loader: LoaderFunction = async ({ params, request }) => {
 
 export const action: ActionFunction = async ({ request }) => {
   const form = await request.formData()
+  const formType = form.get('type')
   const id = Number(form.get('id'))
-  const date = form.get('date')
-    ? new Date(form.get('date') as string).toISOString()
-    : new Date().toISOString()
+  const rating = Number(form.get('rating'))
   const user_id = await getUserId(request)
 
   if (!user_id) {
     throw redirect('/login')
   }
 
-  await db.seen.create({
-    data: {
-      date,
-      movie_id: id,
-      user_id,
-    },
-  })
+  if (formType === 'watch') {
+    const date = form.get('date')
+      ? new Date(form.get('date') as string).toISOString()
+      : new Date().toISOString()
+
+    await db.seen.create({
+      data: {
+        date,
+        movie_id: id,
+        user_id,
+      },
+    })
+  } else if (formType === 'rating') {
+    await db.rating.create({
+      data: {
+        rating,
+        movie_id: id,
+        user_id,
+      },
+    })
+  }
 
   return redirect(`/movie/${id}`)
 }
@@ -116,6 +129,27 @@ export default function MoviePage() {
               </div>
             </div>
           )}
+          {!rating && (
+            <form className="my-4" method="post">
+              <input type="hidden" value={movie.id} name="id" />
+              <input type="hidden" value="rating" name="type" />
+              <div className="mb-2">
+                <label>
+                  <span className="block mb-2 text-sm font-semibold">
+                    Rating
+                  </span>
+                  <input
+                    className="w-full border border-gray-700 px-2 py-1"
+                    type="number"
+                    name="rating"
+                  />
+                </label>
+              </div>
+              <button className="bg-gray-200 px-2 py-1 rounded" type="submit">
+                Rate movie
+              </button>
+            </form>
+          )}
           <p>{movie.overview}</p>
           {hasSeen && (
             <>
@@ -133,13 +167,18 @@ export default function MoviePage() {
           )}
           <form className="mt-4" method="post">
             <input type="hidden" value={movie.id} name="id" />
+            <input type="hidden" value="watch" name="type" />
             {!hasSeen && (
               <div className="mb-2">
                 <label>
                   <span className="block mb-2 text-sm font-semibold">
                     Watch date
                   </span>
-                  <input type="datetime-local" name="date" />
+                  <input
+                    className="w-full border border-gray-700 px-2 py-1"
+                    type="datetime-local"
+                    name="date"
+                  />
                 </label>
               </div>
             )}
