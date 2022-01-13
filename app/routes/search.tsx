@@ -19,11 +19,14 @@ export const loader: LoaderFunction = async ({ request }) => {
   const url = new URL(request.url)
   const query = url.searchParams.get('query') ?? ''
 
-  console.log(decodeURI(query))
-
   const results = await db.movie.findMany({
     select: { id: true, title: true, release_date: true },
-    where: { title: { mode: 'insensitive', contains: decodeURI(query) } },
+    where: {
+      title: {
+        mode: 'insensitive',
+        search: decodeURI(query).replace(/\s/g, ' & '),
+      },
+    },
     orderBy: { release_date: 'desc' },
   })
 
