@@ -54,7 +54,12 @@ export let loader: LoaderFunction = async ({ request }) => {
       select: {
         id: true,
         movie: {
-          select: { id: true, title: true, poster: true, rating: true },
+          select: {
+            id: true,
+            title: true,
+            poster: true,
+            rating: { where: { user_id: Number(user?.id) } },
+          },
         },
       },
       orderBy: { date: 'desc' },
