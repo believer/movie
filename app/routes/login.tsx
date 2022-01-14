@@ -105,9 +105,9 @@ export default function Login() {
   const [searchParams] = useSearchParams()
 
   return (
-    <div className="bg-gray-100 h-screen flex items-center justify-center flex-col">
+    <div className="bg-gray-100 h-screen flex items-center justify-center flex-col p-5">
       <h1 className="text-6xl font-bold">🍿</h1>
-      <div className="w-96 p-5 rounded-lg bg-white shadow-lg mt-10">
+      <div className="sm:w-96 w-full p-5 rounded-lg bg-white shadow-lg mt-10">
         <form
           method="post"
           aria-describedby={
