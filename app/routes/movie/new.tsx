@@ -1,4 +1,4 @@
-import { ActionFunction, Link, redirect } from 'remix'
+import { ActionFunction, redirect } from 'remix'
 import { Input } from '~/components/form'
 import { getCastAndCrew, imdbId } from '~/utils/addMovie.server'
 import { db } from '~/utils/db.server'
@@ -60,29 +60,34 @@ export const action: ActionFunction = async ({ request }) => {
 
 export default function AddMoviePage() {
   return (
-    <div className="max-w-sm md:mx-auto my-10 mx-5">
-      <Link className="mb-5 block text-brandBlue-600 underline text-sm" to="/">
-        Back
-      </Link>
-      <form method="post">
-        <div className="mb-4">
-          <Input label="IMDb ID" name="imdb" />
-        </div>
-        <div className="mb-4">
-          <Input type="number" label="Rating" name="rating" max="10" min="0" />
-        </div>
-        <div className="mb-4">
-          <Input type="datetime-local" label="Date" name="date" />
-        </div>
-        <div>
-          <button
-            type="submit"
-            className="w-full bg-brandBlue-500 text-sm p-2 rounded text-white"
-          >
-            Add movie
-          </button>
-        </div>
-      </form>
-    </div>
+    <>
+      <div className="max-w-sm md:mx-auto my-8 mx-5">
+        <form method="post">
+          <div className="mb-4">
+            <Input label="IMDb ID" name="imdb" />
+          </div>
+          <div className="mb-4">
+            <Input
+              type="number"
+              label="Rating"
+              name="rating"
+              max="10"
+              min="0"
+            />
+          </div>
+          <div className="mb-4">
+            <Input type="datetime-local" label="Date" name="date" />
+          </div>
+          <div>
+            <button
+              type="submit"
+              className="w-full bg-brandBlue-500 text-sm p-2 rounded text-white"
+            >
+              Add movie
+            </button>
+          </div>
+        </form>
+      </div>
+    </>
   )
 }

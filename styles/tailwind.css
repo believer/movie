@@ -5,13 +5,13 @@
 @layer base {
   html,
   body {
-    @apply text-gray-800;
+    @apply text-gray-800 bg-gray-50;
   }
 }
 
 @layer components {
   .grid-feed {
-    grid-template-columns: 20px 1fr minmax(300px, 1140px) 1fr 20px;
+    grid-template-columns: 20px 1fr minmax(200px, 1140px) 1fr 20px;
   }
 
   .grid-movie {
