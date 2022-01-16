@@ -1,5 +1,5 @@
-import md5 from 'md5'
 import { Link, NavLink } from 'remix'
+import Gravatar from './gravatar'
 
 export default function Navigation({ username }: { username?: string }) {
   return (
@@ -33,15 +33,24 @@ export default function Navigation({ username }: { username?: string }) {
           >
             Search
           </NavLink>
+          <NavLink
+            className={({ isActive }) =>
+              `text-sm border-b-2 py-4 ${
+                isActive
+                  ? 'text-gray-800 border-brandBlue-500'
+                  : 'text-gray-500 border-transparent'
+              }`
+            }
+            to="/friends"
+          >
+            Friends
+          </NavLink>
         </div>
       </div>
       <div className="flex items-center space-x-2">
         <form action="/logout" method="post" className="flex space-x-2">
           <button type="submit" className="button">
-            <img
-              className="rounded-full w-8"
-              src={`https://www.gravatar.com/avatar/${md5(username ?? '')}`}
-            />
+            <Gravatar email={username} />
           </button>
         </form>
       </div>

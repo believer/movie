@@ -9,10 +9,9 @@ import {
 import { Input } from '~/components/form'
 import Poster from '~/components/poster'
 import { H1, H2 } from '~/components/typography'
+import { formatDate } from '~/utils/date'
 import { db } from '~/utils/db.server'
 import { getUserId } from '~/utils/session.server'
-
-const dateFormatter = new Intl.DateTimeFormat('sv-SE')
 
 type LoaderData = {
   movie: movie & {
@@ -146,7 +145,7 @@ export default function MoviePage() {
               <H2>Seen</H2>
               <ul className="mb-4 text-sm text-gray-600">
                 {movie.seen
-                  .map(({ date }) => dateFormatter.format(new Date(date)))
+                  .map(({ date }) => formatDate(date))
                   .map((date) => (
                     <li className="tabular-nums" key={date}>
                       {date}
