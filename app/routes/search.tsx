@@ -8,10 +8,9 @@ import {
 } from 'remix'
 import { Input } from '~/components/form'
 import Navigation from '~/components/navigation'
+import { yearFromDate } from '~/utils/date'
 import { db } from '~/utils/db.server'
 import { getUser } from '~/utils/session.server'
-
-const dateFormatter = new Intl.DateTimeFormat('sv-SE', { year: 'numeric' })
 
 type LoaderData = {
   user: user | null
@@ -68,7 +67,7 @@ export default function SearchPage() {
                 </Link>
                 {movie.release_date && (
                   <span className="text-xs">
-                    ({dateFormatter.format(new Date(movie.release_date))})
+                    ({yearFromDate(movie.release_date)})
                   </span>
                 )}
               </li>

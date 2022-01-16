@@ -3,6 +3,7 @@ import React from 'react'
 import { Link, LoaderFunction, redirect, useLoaderData } from 'remix'
 import Navigation from '~/components/navigation'
 import Poster from '~/components/poster'
+import { yearFromDate } from '~/utils/date'
 import { db } from '~/utils/db.server'
 import { getUser } from '~/utils/session.server'
 
@@ -13,7 +14,9 @@ type LoaderData = {
   newMoviesInYear: number
   movies: Array<
     Pick<seen, 'id'> & {
-      movie: Pick<movie, 'id' | 'title' | 'poster'> & { rating: Array<rating> }
+      movie: Pick<movie, 'id' | 'title' | 'poster' | 'release_date'> & {
+        rating: Array<rating>
+      }
     }
   >
 }
@@ -58,6 +61,7 @@ export let loader: LoaderFunction = async ({ request }) => {
           select: {
             id: true,
             title: true,
+            release_date: true,
             poster: true,
             rating: { where: { user_id: Number(user?.id) } },
           },
@@ -110,11 +114,13 @@ export default function Index() {
                     <div className="mt-4 text-gray-700 text-sm font-semibold">
                       {movie.title}
                     </div>
-                    {movie.rating.length > 0 ? (
-                      <span className="text-xs">
-                        {movie.rating[0].rating}/10
-                      </span>
-                    ) : null}
+                    <span className="text-xs">
+                      {movie.release_date && yearFromDate(movie.release_date)}
+                      {movie.release_date && movie.rating.length > 0 && ' - '}
+                      {movie.rating.length > 0
+                        ? `${movie.rating[0].rating}/10`
+                        : null}
+                    </span>
                   </Link>
                 </li>
               ))}
