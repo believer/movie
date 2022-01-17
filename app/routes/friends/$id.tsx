@@ -1,5 +1,5 @@
 import { movie, rating, seen } from '@prisma/client'
-import { LoaderFunction, useLoaderData } from 'remix'
+import { Link, LoaderFunction, useLoaderData } from 'remix'
 import { formatDate } from '~/utils/date'
 import { db } from '~/utils/db.server'
 
@@ -53,9 +53,12 @@ export default function Friends() {
           >
             <div className="flex justify-between">
               <div>
-                <div className="text-sm font-semibold text-gray-700">
+                <Link
+                  className="text-sm text-brandBlue-600 underline"
+                  to={`/movie/${movie.id}`}
+                >
                   {movie.title}
-                </div>
+                </Link>
                 <div className="text-xs text-gray-400">{formatDate(date)}</div>
               </div>
               <div className="text-xs flex items-center text-gray-500">

@@ -26,7 +26,7 @@ export default function Friends() {
   return (
     <>
       <Navigation username={user?.username} />
-      <div className="max-w-4xl mx-auto grid grid-cols-2 gap-8 mb-10">
+      <div className="max-w-4xl lg:mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 mb-10 mx-5">
         <ul className="space-y-2">
           {allUsers.map((user) => (
             <li className="flex items-center space-x-2" key={user.id}>
