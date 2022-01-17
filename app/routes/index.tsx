@@ -3,7 +3,7 @@ import React from 'react'
 import { Link, LoaderFunction, redirect, useLoaderData } from 'remix'
 import Navigation from '~/components/navigation'
 import Poster from '~/components/poster'
-import { yearFromDate } from '~/utils/date'
+import { formatDate, yearFromDate } from '~/utils/date'
 import { db } from '~/utils/db.server'
 import { getUser } from '~/utils/session.server'
 
@@ -13,7 +13,7 @@ type LoaderData = {
   moviesInYear: number
   newMoviesInYear: number
   movies: Array<
-    Pick<seen, 'id'> & {
+    seen & {
       movie: Pick<movie, 'id' | 'title' | 'poster' | 'release_date'> & {
         rating: Array<rating>
       }
@@ -55,8 +55,7 @@ export let loader: LoaderFunction = async ({ request }) => {
       },
     }),
     movies: await db.seen.findMany({
-      select: {
-        id: true,
+      include: {
         movie: {
           select: {
             id: true,
@@ -107,7 +106,7 @@ export default function Index() {
               </select>
             </form>
             <ul className="col-start-3 col-end-3 grid-cols-1 sm:grid-cols-2 grid md:grid-cols-4 gap-5">
-              {data.movies.map(({ movie }) => (
+              {data.movies.map(({ date, movie }) => (
                 <li key={movie.id}>
                   <Link to={`/movie/${movie.id}`} prefetch="intent">
                     <Poster image={movie.poster} />
@@ -116,6 +115,8 @@ export default function Index() {
                     </div>
                     <span className="text-xs">
                       {movie.release_date && yearFromDate(movie.release_date)}
+                      {movie.rating.length > 0 && date && ' - '}
+                      {formatDate(date)}
                       {movie.release_date && movie.rating.length > 0 && ' - '}
                       {movie.rating.length > 0
                         ? `${movie.rating[0].rating}/10`
