@@ -1,5 +1,12 @@
-import { Link, NavLink } from 'remix'
+import { Link, NavLink, NavLinkProps } from 'remix'
 import Gravatar from './gravatar'
+
+const navLinkStyling = ({ isActive }: { isActive: boolean }) =>
+  `text-sm border-b-2 py-4 ${
+    isActive
+      ? 'text-gray-800 border-brandBlue-500'
+      : 'text-gray-500 border-transparent'
+  }`
 
 export default function Navigation({ username }: { username?: string }) {
   return (
@@ -9,41 +16,17 @@ export default function Navigation({ username }: { username?: string }) {
           🍿
         </Link>
         <div className="space-x-4 flex items-center">
-          <NavLink
-            className={({ isActive }) =>
-              `text-sm border-b-2 py-4 ${
-                isActive
-                  ? 'text-gray-800 border-brandBlue-500'
-                  : 'text-gray-500 border-transparent'
-              }`
-            }
-            to="/movie/new"
-          >
+          <NavLink className={navLinkStyling} to="/movie/new">
             Add new movie
           </NavLink>
-          <NavLink
-            className={({ isActive }) =>
-              `text-sm border-b-2 py-4 ${
-                isActive
-                  ? 'text-gray-800 border-brandBlue-500'
-                  : 'text-gray-500 border-transparent'
-              }`
-            }
-            to="/search"
-          >
+          <NavLink className={navLinkStyling} to="/search">
             Search
           </NavLink>
-          <NavLink
-            className={({ isActive }) =>
-              `text-sm border-b-2 py-4 ${
-                isActive
-                  ? 'text-gray-800 border-brandBlue-500'
-                  : 'text-gray-500 border-transparent'
-              }`
-            }
-            to="/friends"
-          >
+          <NavLink className={navLinkStyling} to="/friends">
             Friends
+          </NavLink>
+          <NavLink className={navLinkStyling} to="/stats">
+            Stats
           </NavLink>
         </div>
       </div>
