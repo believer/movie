@@ -43,7 +43,7 @@ export let loader: LoaderFunction = async ({ request }) => {
   )
 
   const days = totalRuntimeInMinutes / (24 * 60)
-  const hours = (days % 1) * 60
+  const hours = (days % 1) * 24
   const minutes = (hours % 1) * 60
 
   return {
@@ -62,31 +62,31 @@ export let loader: LoaderFunction = async ({ request }) => {
 }
 
 export default function Stats() {
-  const data = useLoaderData<LoaderData>()
+  const { user, stats } = useLoaderData<LoaderData>()
 
   return (
     <>
-      <Navigation username={data.user?.username} />
+      <Navigation username={user?.username} />
       <div className="max-w-4xl mx-auto grid grid-cols-1 gap-5">
         <div className="grid gap-5 grid-cols-1 md:grid-cols-2">
           <div className="text-center font-bold text-2xl">
-            {data.stats.totalUniqueMovies}
+            {stats.totalUniqueMovies}
             <div className="text-gray-600 text-sm font-normal">
               unique movies
             </div>
           </div>
           <div className="text-center font-bold text-2xl">
-            {data.stats.totalNumberOfMoviesWithRewatches}
+            {stats.totalNumberOfMoviesWithRewatches}
             <div className="text-gray-600 text-sm font-normal">
-              movies seen including rewatches
+              movies including rewatches
             </div>
           </div>
         </div>
         <div className="text-center font-bold text-2xl">
-          {data.stats.runtime.totalRuntimeInMinutes} minutes
+          {stats.runtime.totalRuntimeInMinutes} minutes
           <div className="text-gray-600 text-sm font-normal">
-            {data.stats.runtime.days} days {data.stats.runtime.hours} hours{' '}
-            {data.stats.runtime.minutes} minutes
+            {stats.runtime.days} days {stats.runtime.hours} hours{' '}
+            {stats.runtime.minutes} minutes
           </div>
         </div>
       </div>
