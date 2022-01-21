@@ -1,4 +1,4 @@
-import { ActionFunction, redirect } from 'remix'
+import { ActionFunction, redirect, useTransition } from 'remix'
 import { Input } from '~/components/form'
 import { getCastAndCrew, imdbId } from '~/utils/addMovie.server'
 import { db } from '~/utils/db.server'
@@ -59,6 +59,8 @@ export const action: ActionFunction = async ({ request }) => {
 }
 
 export default function AddMoviePage() {
+  const transition = useTransition()
+
   return (
     <>
       <div className="max-w-sm md:mx-auto my-8 mx-5">
@@ -80,10 +82,13 @@ export default function AddMoviePage() {
           </div>
           <div>
             <button
+              disabled={transition.state === 'submitting'}
               type="submit"
               className="w-full bg-brandBlue-500 text-sm p-2 rounded text-white"
             >
-              Add movie
+              {transition.state === 'submitting'
+                ? 'Adding movie...'
+                : 'Add movie'}
             </button>
           </div>
         </form>
