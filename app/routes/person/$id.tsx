@@ -32,17 +32,12 @@ export default function MoviePage() {
 
   return (
     <div className="my-8 mx-5">
-      <div className="grid grid-cols-1">
-        <div className="mb-10">
-          <Link className="text-brandBlue-600 underline text-sm" to="/">
-            Back
-          </Link>
-        </div>
+      <div className="max-w-4xl lg:mx-auto mb-10 mx-5">
         <H1>{name}</H1>
         {cast.length > 0 && (
           <>
             <H2>Cast</H2>
-            <ul className="grid grid-cols-2 lg:grid-cols-3 gap-1">
+            <ul className="grid grid-cols-1 lg:grid-cols-2 gap-1">
               {cast.map(({ movie }) => (
                 <li key={movie.id}>
                   <Link
@@ -60,7 +55,7 @@ export default function MoviePage() {
         {crew.length > 0 && (
           <>
             <H2>Crew</H2>
-            <ul className="mt-4 grid grid-cols-2 lg:grid-cols-3 gap-1">
+            <ul className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-1">
               {crew.map(({ job, movie }) => (
                 <li key={movie.id} className="flex items-center space-x-2">
                   <Link
