@@ -1,4 +1,7 @@
 import { user } from '@prisma/client'
+import { CartesianGrid } from 'recharts'
+import { XAxis, YAxis } from 'recharts'
+import { Bar, BarChart, Line, LineChart, ResponsiveContainer } from 'recharts'
 import { LoaderFunction, Outlet, useLoaderData } from 'remix'
 import Navigation from '~/components/navigation'
 import { db } from '~/utils/db.server'
@@ -11,10 +14,17 @@ type Runtime = {
   totalRuntimeInMinutes: number
 }
 
+type YearCount = {
+  count: number
+  year: number
+}
+
 type Stats = {
   totalUniqueMovies: number
   totalNumberOfMoviesWithRewatches: number
   runtime: Runtime
+  moviesFromYear: Array<YearCount>
+  seenInYear: Array<YearCount>
 }
 
 type LoaderData = {
@@ -33,10 +43,17 @@ export let loader: LoaderFunction = async ({ request }) => {
     where: { user_id: Number(user?.id) },
   })
 
+  const moviesFromYear =
+    await db.$queryRaw`SELECT COUNT(*), date_part('year', release_date) as year FROM movie GROUP BY date_part('year', release_date) ORDER BY year ASC;`
+
+  const seenInYear =
+    await db.$queryRaw`SELECT COUNT(*), date_part('year', date) as year FROM seen GROUP BY date_part('year', date) ORDER BY year ASC;`
+
   const allRuntimes = await db.seen.findMany({
     select: { movie: { select: { runtime: true } } },
     where: { user_id: Number(user?.id) },
   })
+
   const totalRuntimeInMinutes = allRuntimes.reduce(
     (acc, { movie: { runtime } }) => acc + runtime,
     0
@@ -57,6 +74,8 @@ export let loader: LoaderFunction = async ({ request }) => {
         days: Math.floor(days),
         totalRuntimeInMinutes,
       },
+      seenInYear,
+      moviesFromYear,
     },
   } as LoaderData
 }
@@ -89,6 +108,24 @@ export default function Stats() {
             {stats.runtime.minutes} minutes
           </div>
         </div>
+
+        <ResponsiveContainer width="100%" height={400}>
+          <BarChart width={800} height={400} data={stats.moviesFromYear}>
+            <CartesianGrid strokeDasharray="3" />
+            <XAxis dataKey="year" angle={-45} interval={1} />
+            <YAxis />
+            <Bar dataKey="count" />
+          </BarChart>
+        </ResponsiveContainer>
+
+        <ResponsiveContainer width="100%" height={400}>
+          <BarChart width={800} height={400} data={stats.seenInYear}>
+            <CartesianGrid strokeDasharray="3" />
+            <XAxis dataKey="year" angle={-45} interval={1} />
+            <YAxis />
+            <Bar dataKey="count" />
+          </BarChart>
+        </ResponsiveContainer>
       </div>
     </>
   )
