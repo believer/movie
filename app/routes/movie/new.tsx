@@ -82,13 +82,10 @@ export default function AddMoviePage() {
           </div>
           <div>
             <button
-              disabled={transition.state === 'submitting'}
               type="submit"
               className="w-full bg-brandBlue-500 text-sm p-2 rounded text-white"
             >
-              {transition.state === 'submitting'
-                ? 'Adding movie...'
-                : 'Add movie'}
+              {transition.submission ? 'Adding movie...' : 'Add movie'}
             </button>
           </div>
         </form>
