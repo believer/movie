@@ -10,8 +10,8 @@ const navLinkStyling = ({ isActive }: { isActive: boolean }) =>
 
 export default function Navigation({ username }: { username?: string }) {
   return (
-    <nav className="col-span-full mb-5 flex items-center px-5 sm:px-20 bg-white border-b border-gray-200 justify-between">
-      <div className="flex space-x-4 sm:space-x-8 items-center">
+    <nav className="col-span-full mb-5 flex items-center px-4 sm:px-20 bg-white border-b border-gray-200 justify-between">
+      <div className="flex space-x-2 sm:space-x-8 items-center">
         <Link className="text-2xl font-bold" to="/">
           🍿
         </Link>
