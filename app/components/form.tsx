@@ -1,3 +1,4 @@
+import React from 'react'
 import { HTMLInputTypeAttribute } from 'react'
 
 const Label = ({
@@ -18,27 +19,25 @@ const Label = ({
 }
 
 export const Input = ({
-  label,
-  name,
+  autoFocus,
   defaultValue,
-  invalid,
   describedBy,
-  type = 'text',
+  invalid,
+  label,
   max,
   min,
-}: {
-  label: string
-  name: string
-  defaultValue?: string
-  invalid?: boolean
+  name,
+  type = 'text',
+  required,
+}: React.ComponentPropsWithoutRef<'input'> & {
   describedBy?: string
-  type?: HTMLInputTypeAttribute
-  max?: string
-  min?: string
+  invalid?: boolean
+  label: string
 }) => {
   return (
     <Label label={label}>
       <input
+        autoFocus={autoFocus}
         aria-invalid={invalid}
         aria-describedby={describedBy}
         className="w-full rounded border-gray-300 shadow-sm border px-2 py-1 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brandBlue-300"
@@ -47,6 +46,7 @@ export const Input = ({
         min={min}
         name={name}
         defaultValue={defaultValue}
+        required={required}
       />
     </Label>
   )
