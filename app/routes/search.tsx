@@ -1,6 +1,7 @@
 import type { movie, user } from '@prisma/client'
 import {
   ActionFunction,
+  Form,
   Link,
   LoaderFunction,
   redirect,
@@ -41,7 +42,7 @@ export const action: ActionFunction = async ({ request }) => {
   const form = await request.formData()
   const query = form.get('query')?.toString() ?? ''
 
-  return redirect(`?query=${encodeURI(query)}`)
+  return redirect(`/search?query=${encodeURI(query)}`)
 }
 
 export default function SearchPage() {
@@ -51,9 +52,9 @@ export default function SearchPage() {
     <>
       <Navigation username={user?.username} />
       <div className="md:mx-auto max-w-xl my-10 mx-5">
-        <form className="my-5" method="post">
+        <Form replace className="my-5" method="post">
           <Input label="Search" type="text" name="query" defaultValue={query} />
-        </form>
+        </Form>
         {results.length > 0 && (
           <ul className="space-y-2">
             {results.map((movie) => (

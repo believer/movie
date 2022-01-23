@@ -1,4 +1,4 @@
-import { ActionFunction, redirect, useTransition } from 'remix'
+import { ActionFunction, Form, redirect, useTransition } from 'remix'
 import { Input } from '~/components/form'
 import { getCastAndCrew, imdbId } from '~/utils/addMovie.server'
 import { db } from '~/utils/db.server'
@@ -64,7 +64,7 @@ export default function AddMoviePage() {
   return (
     <>
       <div className="max-w-sm md:mx-auto my-8 mx-5">
-        <form method="post">
+        <Form method="post">
           <div className="mb-4">
             <Input label="IMDb ID" name="imdb" />
           </div>
@@ -88,7 +88,7 @@ export default function AddMoviePage() {
               {transition.submission ? 'Adding movie...' : 'Add movie'}
             </button>
           </div>
-        </form>
+        </Form>
       </div>
     </>
   )
