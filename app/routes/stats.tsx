@@ -105,6 +105,7 @@ export let loader: LoaderFunction = async ({ request }) => {
   const rewatchedMovies = await db.$queryRaw`SELECT COUNT(*), m.id, m.title
       FROM seen AS s
       INNER JOIN movie AS m ON s.movie_id = m.id
+      WHERE s.user_id=${user_id}
       GROUP BY m.id
       HAVING COUNT(*) > 1
       ORDER BY count DESC
