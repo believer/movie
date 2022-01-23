@@ -1,9 +1,9 @@
-import { user } from '@prisma/client'
+import { movie, user } from '@prisma/client'
 import { CartesianGrid } from 'recharts'
 import { XAxis, YAxis } from 'recharts'
 import { Tooltip } from 'recharts'
 import { Bar, BarChart, Line, LineChart, ResponsiveContainer } from 'recharts'
-import { LoaderFunction, Outlet, useLoaderData } from 'remix'
+import { Link, LoaderFunction, Outlet, useLoaderData } from 'remix'
 import Navigation from '~/components/navigation'
 import { db } from '~/utils/db.server'
 import { getUser } from '~/utils/session.server'
@@ -25,13 +25,35 @@ type Rating = {
   rating: number
 }
 
+type Genres = {
+  count: number
+  name: string
+}
+
+type Person = {
+  name: string
+  id: number
+  count: number
+}
+
+type Persons = {
+  cast: Array<Person>
+  directors: Array<Person>
+  writers: Array<Person>
+  producers: Array<Person>
+  composers: Array<Person>
+}
+
 type Stats = {
   totalUniqueMovies: number
   totalNumberOfMoviesWithRewatches: number
   runtime: Runtime
+  genres: Array<Genres>
   moviesFromYear: Array<YearCount>
   seenInYear: Array<YearCount>
   ratings: Array<Rating>
+  persons: Persons
+  rewatchedMovies: Array<Pick<movie, 'id' | 'title'> & { count: number }>
 }
 
 type LoaderData = {
@@ -60,6 +82,34 @@ export let loader: LoaderFunction = async ({ request }) => {
   const ratings =
     await db.$queryRaw`SELECT COUNT(*), rating FROM rating WHERE user_id=${user_id} GROUP BY rating ORDER BY rating ASC;`
 
+  const genres =
+    await db.$queryRaw`SELECT COUNT(*), g.name FROM movie_genre AS mg INNER JOIN genre AS g ON mg.genre_id = g.id GROUP BY g.name ORDER BY name ASC;`
+
+  const cast = await db.$queryRaw`SELECT COUNT(*), p.name, p.id
+      FROM movie_person AS mp
+      INNER JOIN person AS p ON mp.person_id = p.id
+      WHERE job = 'cast'
+      GROUP BY p.name, p.id
+      ORDER BY count DESC, p.name ASC
+      LIMIT 20;`
+
+  const directors =
+    await db.$queryRaw`SELECT COUNT(*), p.name, p.id FROM movie_person AS mp INNER JOIN person AS p ON mp.person_id = p.id WHERE job = 'director' GROUP BY p.name, p.id ORDER BY count DESC, p.name ASC LIMIT 20;`
+  const composers =
+    await db.$queryRaw`SELECT COUNT(*), p.name, p.id FROM movie_person AS mp INNER JOIN person AS p ON mp.person_id = p.id WHERE job = 'composer' GROUP BY p.name, p.id ORDER BY count DESC, p.name ASC LIMIT 20;`
+  const writers =
+    await db.$queryRaw`SELECT COUNT(*), p.name, p.id FROM movie_person AS mp INNER JOIN person AS p ON mp.person_id = p.id WHERE job = 'writer' GROUP BY p.name, p.id ORDER BY count DESC, p.name ASC LIMIT 20;`
+  const producers =
+    await db.$queryRaw`SELECT COUNT(*), p.name, p.id FROM movie_person AS mp INNER JOIN person AS p ON mp.person_id = p.id WHERE job = 'producer' GROUP BY p.name, p.id ORDER BY count DESC, p.name ASC LIMIT 20;`
+
+  const rewatchedMovies = await db.$queryRaw`SELECT COUNT(*), m.id, m.title
+      FROM seen AS s
+      INNER JOIN movie AS m ON s.movie_id = m.id
+      GROUP BY m.id
+      HAVING COUNT(*) > 1
+      ORDER BY count DESC
+      LIMIT 21;`
+
   const allRuntimes = await db.seen.findMany({
     select: { movie: { select: { runtime: true } } },
     where: { user_id },
@@ -85,11 +135,41 @@ export let loader: LoaderFunction = async ({ request }) => {
         days: Math.floor(days),
         totalRuntimeInMinutes,
       },
+      genres,
       seenInYear,
       moviesFromYear,
       ratings,
+      persons: { cast, writers, directors, producers, composers },
+      rewatchedMovies,
     },
   } as LoaderData
+}
+
+const People = ({
+  people,
+  title,
+}: {
+  people: Array<Person>
+  title: string
+}) => {
+  return (
+    <div>
+      <h2 className="mb-2 text-lg font-bold">{title}</h2>
+      <ul className="text-sm space-y-2">
+        {people.map(({ name, id, count }) => (
+          <li key={id}>
+            <Link
+              className="text-brandBlue-600 underline text-sm"
+              to={`/person/${id}`}
+              prefetch="intent"
+            >
+              {name} <span className="text-xs text-gray-500">({count})</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
 }
 
 export default function Stats() {
@@ -129,7 +209,14 @@ export default function Stats() {
             margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
           >
             <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
-            <XAxis dataKey="year" interval={3} />
+            <XAxis
+              dataKey="year"
+              interval={0}
+              angle={-90}
+              dy={15}
+              dx={-5}
+              fontSize={10}
+            />
             <YAxis />
             <Bar dataKey="count" fill="#219EBC" />
             <Tooltip />
@@ -165,6 +252,52 @@ export default function Stats() {
             <Tooltip />
           </BarChart>
         </ResponsiveContainer>
+
+        <ResponsiveContainer width="100%" height={400}>
+          <BarChart
+            width={800}
+            height={400}
+            data={stats.genres}
+            margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
+          >
+            <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
+            <XAxis
+              dataKey="name"
+              angle={-90}
+              interval={0}
+              height={100}
+              dy={50}
+              dx={-5}
+              fontSize={11}
+            />
+            <YAxis />
+            <Bar dataKey="count" fill="#219EBC" />
+            <Tooltip />
+          </BarChart>
+        </ResponsiveContainer>
+        <div className="mb-8">
+          <h2 className="mb-2 text-lg font-bold">Most watched movies</h2>
+          <ul className="text-sm grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2">
+            {stats.rewatchedMovies.map(({ title, id, count }) => (
+              <li key={id}>
+                <Link
+                  className="text-brandBlue-600 underline text-sm"
+                  to={`/movie/${id}`}
+                  prefetch="intent"
+                >
+                  {title} ({count})
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-8">
+          <People title="Cast" people={stats.persons.cast} />
+          <People title="Director" people={stats.persons.directors} />
+          <People title="Composer" people={stats.persons.composers} />
+          <People title="Producer" people={stats.persons.producers} />
+          <People title="Writer" people={stats.persons.writers} />
+        </div>
       </div>
     </>
   )
