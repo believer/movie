@@ -4,5 +4,6 @@ node_modules
 /server/build
 /public/build
 .env
+.DS_Store
 app/tailwind.css
 build
