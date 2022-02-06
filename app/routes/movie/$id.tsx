@@ -1,4 +1,4 @@
-import { genre, job, movie, person, rating, seen } from '@prisma/client'
+import { genre, job, movie, person, rating, seen, user } from '@prisma/client'
 import {
   ActionFunction,
   Link,
@@ -7,6 +7,7 @@ import {
   useLoaderData,
 } from 'remix'
 import { Input } from '~/components/form'
+import Gravatar from '~/components/gravatar'
 import Poster from '~/components/poster'
 import { H1, H2 } from '~/components/typography'
 import { formatDate } from '~/utils/date'
@@ -18,10 +19,14 @@ type LoaderData = {
     rating: Array<rating>
     movie_person: Array<{ person: person; job: job }>
     movie_genre: Array<{ genre: genre }>
-    seen: Array<Pick<seen, 'date'>>
+    seen: Array<
+      Pick<seen, 'date' | 'user_id'> & { user: Pick<user, 'username'> }
+    >
   }
   cast: Array<{ person: person; job: job }>
   crew: Array<{ person: person; job: job }>
+  userId: number
+  users: Array<Pick<user, 'id' | 'username'>>
 }
 
 export let loader: LoaderFunction = async ({ params, request }) => {
@@ -35,10 +40,12 @@ export let loader: LoaderFunction = async ({ params, request }) => {
   const movie = await db.movie.findUnique({
     where: { id },
     include: {
-      rating: { where: { user_id } },
+      rating: true,
       seen: {
-        select: { date: true },
-        where: { user_id },
+        select: {
+          date: true,
+          user_id: true,
+        },
         orderBy: { date: 'desc' },
       },
       movie_genre: { select: { genre: true } },
@@ -57,10 +64,22 @@ export let loader: LoaderFunction = async ({ params, request }) => {
     throw new Error('No movie found')
   }
 
+  const users = await db.user.findMany({
+    where: {
+      id: {
+        not: user_id,
+      },
+    },
+    select: {
+      username: true,
+      id: true,
+    },
+  })
+
   const cast = movie.movie_person.filter(({ job }) => job === 'cast')
   const crew = movie.movie_person.filter(({ job }) => job !== 'cast')
 
-  return { movie, cast, crew }
+  return { movie, cast, crew, userId: user_id, users }
 }
 
 export const action: ActionFunction = async ({ request }) => {
@@ -100,10 +119,15 @@ export const action: ActionFunction = async ({ request }) => {
 }
 
 export default function MoviePage() {
-  const { movie, cast, crew } = useLoaderData<LoaderData>()
+  const { movie, cast, crew, userId, users } = useLoaderData<LoaderData>()
 
-  const rating = movie.rating[0]?.rating
-  const hasSeen = movie.seen.length > 0
+  const myRating = movie.rating.filter((s) => s.user_id === userId)
+  const rating = myRating[0]?.rating
+  const friendsRating = movie.rating.filter((s) => s.user_id !== userId)
+  const mySeen = movie.seen.filter((s) => s.user_id === userId)
+  const friendsSeen = movie.seen.filter((s) => s.user_id !== userId)
+  const hasSeen = mySeen.length > 0
+  const friendsHaveSeen = friendsSeen.length > 0
 
   return (
     <div className="my-10 mx-5 lg:mx-0">
@@ -143,8 +167,8 @@ export default function MoviePage() {
           {hasSeen && (
             <>
               <H2>Seen</H2>
-              <ul className="mb-4 text-sm text-gray-600">
-                {movie.seen
+              <ul className="mb-4 text-sm text-gray-600 space-y-1">
+                {mySeen
                   .map(({ date }) => formatDate(date))
                   .map((date) => (
                     <li className="tabular-nums" key={date}>
@@ -169,6 +193,33 @@ export default function MoviePage() {
               {hasSeen ? 'Add new watch' : 'Add to my movies'}
             </button>
           </form>
+          {friendsHaveSeen && (
+            <>
+              <H2>Friends seen</H2>
+              <ul className="mb-4 text-sm text-gray-600 space-y-1">
+                {friendsSeen.map(({ date, user_id }) => (
+                  <li
+                    className="tabular-nums flex items-center space-x-2"
+                    key={formatDate(date)}
+                  >
+                    <Gravatar
+                      email={
+                        users.find(({ id }) => Number(id) === user_id)?.username
+                      }
+                    />
+                    <span>{formatDate(date)}</span>
+                    <span>
+                      {` - ${
+                        friendsRating.find(
+                          (user) => Number(user.user_id) === user_id
+                        )?.rating
+                      } / 10`}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
         </div>
         <div className="lg:col-start-4 lg:col-end-5">
           <H2>Cast</H2>
