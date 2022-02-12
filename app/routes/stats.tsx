@@ -77,7 +77,7 @@ export let loader: LoaderFunction = async ({ request }) => {
     await db.$queryRaw`SELECT COUNT(*), date_part('year', release_date) as year FROM movie GROUP BY date_part('year', release_date) ORDER BY year ASC;`
 
   const seenInYear =
-    await db.$queryRaw`SELECT COUNT(*), date_part('year', date) as year FROM seen WHERE user_id=${user_id} GROUP BY date_part('year', date) ORDER BY year ASC;`
+    await db.$queryRaw`SELECT COUNT(*), date_part('year', date) as year FROM seen WHERE user_id=${user_id} AND date_part('year', date) != '2011' GROUP BY date_part('year', date) ORDER BY year ASC;`
 
   const ratings =
     await db.$queryRaw`SELECT COUNT(*), rating FROM rating WHERE user_id=${user_id} GROUP BY rating ORDER BY rating ASC;`
@@ -276,7 +276,7 @@ export default function Stats() {
             <Tooltip />
           </BarChart>
         </ResponsiveContainer>
-        <div className="mb-8">
+        <div className="mb-8 px-5 sm:px-0">
           <h2 className="mb-2 text-lg font-bold">Most watched movies</h2>
           <ul className="text-sm grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2">
             {stats.rewatchedMovies.map(({ title, id, count }) => (
@@ -292,7 +292,7 @@ export default function Stats() {
             ))}
           </ul>
         </div>
-        <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-8 px-5 sm:px-0">
           <People title="Cast" people={stats.persons.cast} />
           <People title="Director" people={stats.persons.directors} />
           <People title="Composer" people={stats.persons.composers} />
