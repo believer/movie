@@ -165,7 +165,7 @@ export default function MoviePage() {
           )}
           <p>{movie.overview}</p>
           {hasSeen && (
-            <>
+            <div className="mt-4">
               <H2>Seen</H2>
               <ul className="mb-4 text-sm text-gray-600 space-y-1">
                 {mySeen
@@ -176,7 +176,7 @@ export default function MoviePage() {
                     </li>
                   ))}
               </ul>
-            </>
+            </div>
           )}
           <form className="mt-4" method="post">
             <input type="hidden" value={movie.id} name="id" />
@@ -194,7 +194,7 @@ export default function MoviePage() {
             </button>
           </form>
           {friendsHaveSeen && (
-            <>
+            <div className="mt-4">
               <H2>Friends seen</H2>
               <ul className="mb-4 text-sm text-gray-600 space-y-1">
                 {friendsSeen.map(({ date, user_id }) => (
@@ -218,39 +218,47 @@ export default function MoviePage() {
                   </li>
                 ))}
               </ul>
-            </>
+            </div>
           )}
         </div>
-        <div className="lg:col-start-4 lg:col-end-5">
-          <H2>Cast</H2>
-          <ul className="grid grid-cols-2 lg:grid-cols-3 gap-y-1">
-            {cast.map(({ person }) => (
-              <li key={person.id}>
-                <Link
-                  className="text-brandBlue-600 underline text-sm"
-                  to={`/person/${person.id}`}
-                  prefetch="intent"
-                >
-                  {person.name}
-                </Link>
-              </li>
-            ))}
-          </ul>
-          <H2>Crew</H2>
-          <ul className="grid grid-cols-2 lg:grid-cols-3 gap-y-1">
-            {crew.map(({ job, person }) => (
-              <li key={person.id} className="flex items-center space-x-2">
-                <Link
-                  className="text-brandBlue-600 underline text-sm"
-                  to={`/person/${person.id}`}
-                  prefetch="intent"
-                >
-                  {person.name}
-                </Link>
-                <span className="text-xs text-gray-500">{job}</span>
-              </li>
-            ))}
-          </ul>
+        <div className="lg:col-start-4 lg:col-end-5 space-y-4">
+          {cast.length > 0 && (
+            <>
+              <H2>Cast</H2>
+              <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-1">
+                {cast.map(({ person }) => (
+                  <li key={person.id}>
+                    <Link
+                      className="text-brandBlue-600 underline text-sm"
+                      to={`/person/${person.id}`}
+                      prefetch="intent"
+                    >
+                      {person.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+          {crew.length > 0 && (
+            <>
+              <H2>Crew</H2>
+              <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-1">
+                {crew.map(({ job, person }) => (
+                  <li key={person.id} className="flex items-center space-x-2">
+                    <Link
+                      className="text-brandBlue-600 underline text-sm"
+                      to={`/person/${person.id}`}
+                      prefetch="intent"
+                    >
+                      {person.name}
+                    </Link>
+                    <span className="text-xs text-gray-500">{job}</span>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
         </div>
       </div>
     </div>

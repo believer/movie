@@ -32,7 +32,7 @@ export default function MoviePage() {
 
   return (
     <div className="my-8 mx-5">
-      <div className="max-w-4xl lg:mx-auto mb-10 mx-5">
+      <div className="max-w-4xl lg:mx-auto mb-10 mx-5 space-y-4">
         <H1>{name}</H1>
         {cast.length > 0 && (
           <>
