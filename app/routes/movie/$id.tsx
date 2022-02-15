@@ -225,7 +225,7 @@ export default function MoviePage() {
           {cast.length > 0 && (
             <>
               <H2>Cast</H2>
-              <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-1">
+              <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1">
                 {cast.map(({ person }) => (
                   <li key={person.id}>
                     <Link
@@ -243,9 +243,9 @@ export default function MoviePage() {
           {crew.length > 0 && (
             <>
               <H2>Crew</H2>
-              <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-1">
+              <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1">
                 {crew.map(({ job, person }) => (
-                  <li key={person.id} className="flex items-center space-x-2">
+                  <li key={person.id} className="space-x-2">
                     <Link
                       className="text-brandBlue-600 underline text-sm"
                       to={`/person/${person.id}`}
