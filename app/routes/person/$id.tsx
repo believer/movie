@@ -68,7 +68,7 @@ export default function MoviePage() {
             <H2>Crew</H2>
             <ul className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-1">
               {crew.map(({ job, movie }) => (
-                <li key={movie.id} className="flex items-center space-x-2">
+                <li key={movie.id} className="space-x-2">
                   <Link
                     className="text-brandBlue-600 underline text-sm"
                     to={`/movie/${movie.id}`}
