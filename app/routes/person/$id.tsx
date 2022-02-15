@@ -1,6 +1,7 @@
-import { job, movie, person } from '@prisma/client'
+import { job, movie } from '@prisma/client'
 import { Link, LoaderFunction, useLoaderData } from 'remix'
 import { H1, H2 } from '~/components/typography'
+import { yearFromDate } from '~/utils/date'
 import { db } from '~/utils/db.server'
 
 type LoaderData = {
@@ -13,7 +14,14 @@ export let loader: LoaderFunction = async ({ params }) => {
   const person = await db.person.findUnique({
     where: { id: Number(params.id) },
     include: {
-      movie_person: { select: { job: true, movie: true } },
+      movie_person: {
+        select: { job: true, movie: true },
+        orderBy: {
+          movie: {
+            release_date: 'desc',
+          },
+        },
+      },
     },
   })
 
@@ -39,7 +47,7 @@ export default function MoviePage() {
             <H2>Cast</H2>
             <ul className="grid grid-cols-1 lg:grid-cols-2 gap-1">
               {cast.map(({ movie }) => (
-                <li key={movie.id}>
+                <li className="space-x-2" key={movie.id}>
                   <Link
                     className="text-brandBlue-600 underline text-sm"
                     to={`/movie/${movie.id}`}
@@ -47,6 +55,9 @@ export default function MoviePage() {
                   >
                     {movie.title}
                   </Link>
+                  <span className="text-xs text-gray-500">
+                    ({movie.release_date && yearFromDate(movie.release_date)})
+                  </span>
                 </li>
               ))}
             </ul>
@@ -65,6 +76,9 @@ export default function MoviePage() {
                   >
                     {movie.title}
                   </Link>
+                  <span className="text-xs text-gray-500">
+                    ({movie.release_date && yearFromDate(movie.release_date)})
+                  </span>
                   <span className="text-xs text-gray-500">{job}</span>
                 </li>
               ))}
