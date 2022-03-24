@@ -1,4 +1,4 @@
-import { movie, user } from '@prisma/client'
+import { job, movie, user } from '@prisma/client'
 import { CartesianGrid } from 'recharts'
 import { XAxis, YAxis } from 'recharts'
 import { Tooltip } from 'recharts'
@@ -85,22 +85,30 @@ export let loader: LoaderFunction = async ({ request }) => {
   const genres =
     await db.$queryRaw`SELECT COUNT(*), g.name FROM movie_genre AS mg INNER JOIN genre AS g ON mg.genre_id = g.id GROUP BY g.name ORDER BY name ASC;`
 
-  const cast = await db.$queryRaw`SELECT COUNT(*), p.name, p.id
-      FROM movie_person AS mp
-      INNER JOIN person AS p ON mp.person_id = p.id
-      WHERE job = 'cast'
-      GROUP BY p.name, p.id
-      ORDER BY count DESC, p.name ASC
-      LIMIT 20;`
+  const persons: Persons = {
+    cast: [],
+    composers: [],
+    directors: [],
+    producers: [],
+    writers: [],
+  }
+  const jobs = Object.values(job)
 
-  const directors =
-    await db.$queryRaw`SELECT COUNT(*), p.name, p.id FROM movie_person AS mp INNER JOIN person AS p ON mp.person_id = p.id WHERE job = 'director' GROUP BY p.name, p.id ORDER BY count DESC, p.name ASC LIMIT 20;`
-  const composers =
-    await db.$queryRaw`SELECT COUNT(*), p.name, p.id FROM movie_person AS mp INNER JOIN person AS p ON mp.person_id = p.id WHERE job = 'composer' GROUP BY p.name, p.id ORDER BY count DESC, p.name ASC LIMIT 20;`
-  const writers =
-    await db.$queryRaw`SELECT COUNT(*), p.name, p.id FROM movie_person AS mp INNER JOIN person AS p ON mp.person_id = p.id WHERE job = 'writer' GROUP BY p.name, p.id ORDER BY count DESC, p.name ASC LIMIT 20;`
-  const producers =
-    await db.$queryRaw`SELECT COUNT(*), p.name, p.id FROM movie_person AS mp INNER JOIN person AS p ON mp.person_id = p.id WHERE job = 'producer' GROUP BY p.name, p.id ORDER BY count DESC, p.name ASC LIMIT 20;`
+  for (const job of jobs) {
+    const data: Array<Person> = await db.$queryRaw`
+  SELECT COUNT(*), p.name, p.id
+  FROM seen AS s
+	INNER JOIN movie_person AS mp ON mp.movie_id = s.id
+	INNER JOIN person AS p ON mp.person_id = p.id
+  WHERE job = ${job} AND user_id = ${user_id}
+  GROUP BY p.name, p.id
+  ORDER BY COUNT DESC, p.name ASC
+  LIMIT 20;`
+
+    const id: keyof Persons = job === 'cast' ? 'cast' : `${job}s`
+
+    persons[id] = data
+  }
 
   const rewatchedMovies = await db.$queryRaw`SELECT COUNT(*), m.id, m.title
       FROM seen AS s
@@ -140,7 +148,7 @@ export let loader: LoaderFunction = async ({ request }) => {
       seenInYear,
       moviesFromYear,
       ratings,
-      persons: { cast, writers, directors, producers, composers },
+      persons,
       rewatchedMovies,
     },
   } as LoaderData
