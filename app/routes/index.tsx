@@ -115,7 +115,7 @@ export default function Index() {
               {data.movies.map(({ date, movie }) => (
                 <li key={movie.id}>
                   <Link to={`/movie/${movie.id}`} prefetch="intent">
-                    <Poster image={movie.poster} />
+                    <Poster image={movie.poster} title={movie.title} />
                     <div className="mt-4 text-gray-700 text-sm font-semibold">
                       {movie.title}
                     </div>

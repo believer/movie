@@ -134,7 +134,7 @@ export default function MoviePage() {
       <div className="grid grid-cols-1 lg:grid-movie gap-8 mt-8">
         <div className="lg:col-start-3 lg:col-end-4">
           <div className="w-60 mb-5">
-            <Poster image={movie.poster} />
+            <Poster image={movie.poster} title={movie.title} />
           </div>
           <H1>{movie.title}</H1>
           <div className="mt-2 mb-4 flex text-xs text-gray-600">

@@ -1,5 +1,6 @@
-import { user } from '@prisma/client'
-import { LoaderFunction, NavLink, Outlet, useLoaderData } from 'remix'
+import type { user } from '@prisma/client'
+import type { LoaderFunction } from 'remix'
+import { NavLink, Outlet, useLoaderData } from 'remix'
 import Gravatar from '~/components/gravatar'
 import Navigation from '~/components/navigation'
 import { db } from '~/utils/db.server'
