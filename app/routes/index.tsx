@@ -1,18 +1,19 @@
 import type { movie, rating, seen, user } from '@prisma/client'
 import React from 'react'
-import { Link, LoaderFunction, redirect, useLoaderData } from 'remix'
+import { json, Link, LoaderFunction, redirect, useLoaderData } from 'remix'
+import InputSelect from '~/components/InputSelect'
 import Navigation from '~/components/navigation'
 import Poster from '~/components/poster'
 import { formatDate, yearFromDate } from '~/utils/date'
 import { db } from '~/utils/db.server'
 import { getUser } from '~/utils/session.server'
-import { SelectorIcon } from '@heroicons/react/solid'
 
 type LoaderData = {
   user: user | null
   year: string
   moviesInYear: number
   newMoviesInYear: number
+  yearsWithWatches: Array<string>
   movies: Array<
     seen & {
       movie: Pick<movie, 'id' | 'title' | 'poster' | 'release_date'> & {
@@ -43,8 +44,13 @@ export let loader: LoaderFunction = async ({ request }) => {
     },
   }
 
-  const data: LoaderData = {
+  const yearsWithWatches: Array<{ year: string }> =
+    await db.$queryRaw`SELECT date_part('year', date)::TEXT as year FROM seen GROUP by year ORDER BY year ASC;`
+
+  return json<LoaderData>({
     year,
+    yearsWithWatches:
+      yearsWithWatches.map((row: { year: string }) => row.year) ?? [],
     moviesInYear: await db.seen.count(filterByYear),
     newMoviesInYear: await db.movie.count({
       where: {
@@ -71,9 +77,7 @@ export let loader: LoaderFunction = async ({ request }) => {
       ...filterByYear,
     }),
     user,
-  }
-
-  return data
+  })
 }
 
 export default function Index() {
@@ -87,29 +91,15 @@ export default function Index() {
         {data.moviesInYear > 0 ? (
           <>
             <form className="col-start-3 col-end-3" method="post" ref={formRef}>
-              <div className="w-32 border border-gray-200 rounded-sm relative">
-                <select
-                  className="appearance-none w-full p-2 pl-4"
-                  name="year"
-                  defaultValue={data.year}
-                  onChange={() => formRef.current?.submit()}
-                >
-                  <option value="2022">2022</option>
-                  <option value="2021">2021</option>
-                  <option value="2020">2020</option>
-                  <option value="2019">2019</option>
-                  <option value="2018">2018</option>
-                  <option value="2017">2017</option>
-                  <option value="2016">2016</option>
-                  <option value="2015">2015</option>
-                  <option value="2014">2014</option>
-                  <option value="2013">2013</option>
-                  <option value="2012">2012</option>
-                </select>
-                <div className="absolute inset-y-0 w-4 right-2 flex items-center pointer-events-none text-gray-500">
-                  <SelectorIcon />
-                </div>
-              </div>
+              <InputSelect
+                defaultValue={data.year}
+                name="year"
+                onChange={() => formRef.current?.submit()}
+                options={data.yearsWithWatches.map((year) => ({
+                  value: year,
+                  label: year,
+                }))}
+              />
             </form>
             <ul className="col-start-3 col-end-3 grid-cols-1 sm:grid-cols-2 grid md:grid-cols-4 gap-5">
               {data.movies.map(({ date, movie }) => (
