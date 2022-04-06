@@ -1,5 +1,4 @@
 import React from 'react'
-import { HTMLInputTypeAttribute } from 'react'
 
 const Label = ({
   children,

@@ -1,9 +1,14 @@
 import { job, movie, user } from '@prisma/client'
-import { CartesianGrid } from 'recharts'
-import { XAxis, YAxis } from 'recharts'
-import { Tooltip } from 'recharts'
-import { Bar, BarChart, Line, LineChart, ResponsiveContainer } from 'recharts'
-import { Link, LoaderFunction, Outlet, useLoaderData } from 'remix'
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts'
+import { Link, LoaderFunction, useLoaderData } from 'remix'
 import Navigation from '~/components/navigation'
 import { db } from '~/utils/db.server'
 import { getUser } from '~/utils/session.server'
@@ -181,7 +186,7 @@ const People = ({
   )
 }
 
-export default function Stats() {
+export default function StatsPage() {
   const { user, stats } = useLoaderData<LoaderData>()
 
   return (

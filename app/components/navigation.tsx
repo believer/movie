@@ -1,4 +1,4 @@
-import { Link, NavLink, NavLinkProps } from 'remix'
+import { Link, NavLink } from 'remix'
 import Gravatar from './gravatar'
 
 const navLinkStyling = ({ isActive }: { isActive: boolean }) =>
