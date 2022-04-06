@@ -49,5 +49,8 @@ export const getCastAndCrew = (
   return Array.from(persons.values())
 }
 
-export const imdbId = (input: FormDataEntryValue | null) =>
-  input?.toString().match(/tt\d+/)?.[0]
+export const imdbId = (input: FormDataEntryValue | null) => {
+  const value = input?.toString()
+
+  return value?.includes('tt') ? value.toString().match(/tt\d+/)?.[0] : value
+}
