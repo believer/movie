@@ -4,8 +4,8 @@ import { json, Link, LoaderFunction, redirect, useLoaderData } from 'remix'
 import InputSelect from '~/components/InputSelect'
 import Navigation from '~/components/navigation'
 import Poster from '~/components/poster'
-import { formatDate, yearFromDate } from '~/utils/date'
 import { db } from '~/utils/db.server'
+import { movieMeta } from '~/utils/movie'
 import { getUser } from '~/utils/session.server'
 
 type LoaderData = {
@@ -110,13 +110,7 @@ export default function Index() {
                       {movie.title}
                     </div>
                     <span className="text-xs">
-                      {movie.release_date && yearFromDate(movie.release_date)}
-                      {movie.rating.length > 0 && date && ' - '}
-                      {formatDate(date)}
-                      {movie.release_date && movie.rating.length > 0 && ' - '}
-                      {movie.rating.length > 0
-                        ? `${movie.rating[0].rating}/10`
-                        : null}
+                      {movieMeta({ date, ...movie })}
                     </span>
                   </Link>
                 </li>
