@@ -46,6 +46,33 @@ export const action: ActionFunction = async ({ request }) => {
     const credits = await tmdbFetchMovie(`/${id}/credits`)
     const persons = getCastAndCrew(credits.cast, credits.crew)
 
+    const movieExists = await db.movie.findUnique({
+      where: { imdb_id: movie.imdb_id },
+    })
+
+    // If movie has already been added, add a new watch
+    // and rating
+    if (movieExists) {
+      await db.seen.create({
+        data: {
+          user_id: userId,
+          movie_id: movieExists.id,
+          date,
+        },
+      })
+
+      await db.rating.create({
+        data: {
+          rating,
+          user_id: userId,
+          movie_id: movieExists.id,
+        },
+      })
+
+      return redirect(`/movie/${movieExists.id}`)
+    }
+
+    // Create new movie if it doesn't exist
     const fields = {
       data: {
         imdb_id: movie.imdb_id,
