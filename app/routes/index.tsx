@@ -104,14 +104,18 @@ export default function Index() {
             <ul className="col-start-3 col-end-3 grid-cols-1 sm:grid-cols-2 grid md:grid-cols-4 gap-5">
               {data.movies.map(({ date, movie }) => (
                 <li key={movie.id}>
-                  <Link to={`/movie/${movie.id}`} prefetch="intent">
+                  <Link
+                    to={`/movie/${movie.id}`}
+                    prefetch="intent"
+                    className="text-center"
+                  >
                     <Poster image={movie.poster} title={movie.title} />
-                    <div className="mt-4 text-gray-700 text-sm font-semibold">
+                    <div className="p-4 pb-1 text-gray-700 text-sm font-semibold">
                       {movie.title}
                     </div>
-                    <span className="text-xs">
+                    <div className="text-xs text-gray-500">
                       {movieMeta({ date, ...movie })}
-                    </span>
+                    </div>
                   </Link>
                 </li>
               ))}
